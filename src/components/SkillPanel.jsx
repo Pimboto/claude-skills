@@ -6,6 +6,7 @@ import { GitHubIcon, KindIcon, DownloadIcon } from './Icons.jsx';
 import SkillTile from './SkillTile.jsx';
 import DownloadModal from './DownloadModal.jsx';
 import Logo from './Logo.jsx';
+import { cue } from '../fx.js';
 
 function Media({ item }) {
   if (item.type === 'video') {
@@ -29,8 +30,8 @@ export default function SkillPanel() {
             <span>{SITE.name}</span>
           </div>
           <nav className="side-nav" aria-label="Library">
-            <a className="side-item" href="#top"><KindIcon kind="Home" /> Home</a>
-            <a className="side-item" href="#skills"><KindIcon kind="Reel" /> Showreel</a>
+            <a className="side-item" href="#top" data-cuelume-navigate data-cuelume-emphasis="subtle"><KindIcon kind="Home" /> Home</a>
+            <a className="side-item" href="#skills" data-cuelume-navigate data-cuelume-emphasis="subtle"><KindIcon kind="Reel" /> Showreel</a>
             <a className="side-item" href={SITE.github} target="_blank" rel="noreferrer"><KindIcon kind="Book" /> Docs</a>
             <span className="side-item off" title="Coming soon"><KindIcon kind="Play" /> Tutorials <span className="soon">Soon</span></span>
           </nav>
@@ -40,6 +41,7 @@ export default function SkillPanel() {
               <button
                 key={s.id}
                 className={`side-item ${s.id === active ? 'on' : ''}`}
+                data-cuelume-select
                 onClick={() => { setActive(s.id); setTab('preview'); }}
               >
                 <SkillTile skill={s} size={20} /> <span className="side-name">{s.name}</span>
@@ -72,11 +74,11 @@ export default function SkillPanel() {
               </div>
             </div>
             <div className="skill-actions">
-              <a className="btn btn-dark" href={repoLink(skill.id)} target="_blank" rel="noreferrer">
+              <a className="btn btn-dark" href={repoLink(skill.id)} target="_blank" rel="noreferrer" data-cuelume-tap data-cuelume-emphasis="subtle">
                 <GitHubIcon /> Source
               </a>
               <MetalFx preset="silver" variant="button" theme="dark" strength={0.9}>
-                <button className="metal-pill small" onClick={() => setDownloading(skill)}>
+                <button className="metal-pill small" onClick={() => setDownloading(skill)} data-cuelume-open>
                   <DownloadIcon /> Download skill
                 </button>
               </MetalFx>
@@ -87,7 +89,7 @@ export default function SkillPanel() {
 
           <div className="tabs" role="tablist">
             {[['preview', 'Preview'], ['install', 'Install']].map(([k, label]) => (
-              <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>
+              <button key={k} role="tab" data-cuelume-select aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>
                 {label}
               </button>
             ))}
@@ -122,7 +124,7 @@ export default function SkillPanel() {
           )}
         </section>
       </div>
-      {downloading && <DownloadModal skill={downloading} onClose={() => setDownloading(null)} />}
+      {downloading && <DownloadModal skill={downloading} onClose={() => { cue('close'); setDownloading(null); }} />}
     </div>
   );
 }

@@ -15,7 +15,7 @@
   --tuck: 14px;
 }
 * { box-sizing: border-box; }
-html { background: #181818; scroll-behavior: smooth; }
+html { background: #181818; }
 body { margin: 0; background: var(--body); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
@@ -54,6 +54,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .nav-links a { display: inline-flex; align-items: center; gap: 5px; }
 .nav-links a:hover, .gh:hover { color: #fff; }
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.sound-btn { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14); transition: background 0.15s; }
+.sound-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.sound-btn[aria-pressed='false'] { color: rgba(255, 255, 255, 0.5); }
 .gh { display: inline-flex; align-items: center; gap: 7px; color: rgba(255, 255, 255, 0.92); margin-right: 6px; }
 
 .btn {

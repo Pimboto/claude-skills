@@ -3,6 +3,7 @@ import { MetalFx } from 'metal-fx';
 import { downloadLink } from '../site.js';
 import { DownloadIcon } from './Icons.jsx';
 import SkillTile from './SkillTile.jsx';
+import { cue, lockScroll } from '../fx.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const remembered = () => { try { return localStorage.getItem('ps_email') || ''; } catch { return ''; } };
@@ -24,6 +25,8 @@ export default function DownloadModal({ skill, onClose }) {
   const [error, setError] = useState('');
   const input = useRef(null);
 
+  useEffect(() => { lockScroll(true); return () => lockScroll(false); }, []);
+
   useEffect(() => {
     input.current?.focus();
     const onKey = (e) => e.key === 'Escape' && onClose();
@@ -34,24 +37,25 @@ export default function DownloadModal({ skill, onClose }) {
   const submit = async (e) => {
     e.preventDefault();
     const v = email.trim();
-    if (!EMAIL_RE.test(v)) { setError('That email does not look right.'); setState('error'); return; }
+    if (!EMAIL_RE.test(v)) { setError('That email does not look right.'); setState('error'); cue('error', { emphasis: 'subtle' }); return; }
     setState('sending'); setError('');
     try {
       await subscribe(v, skill.id);
       remember(v);
       setState('done');
+      cue('success');
       const a = document.createElement('a');
       a.href = downloadLink(skill.id);
       a.download = `${skill.id}.zip`;
       document.body.appendChild(a); a.click(); a.remove();
     } catch (err) {
-      setError(err.message); setState('error');
+      setError(err.message); setState('error'); cue('error');
     }
   };
 
   return (
     <div className="modal-back" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="dl-title">
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="dl-title" data-lenis-prevent>
         <button className="modal-x" onClick={onClose} aria-label="Close">×</button>
         <SkillTile skill={skill} size={52} />
         {state === 'done' ? (

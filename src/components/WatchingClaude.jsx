@@ -5,7 +5,9 @@ import { useEffect, useRef } from 'react';
 // They follow the pointer with an underdamped spring, blink, go ^ ^ when you come close and > < while you press.
 const LOOK = { u: 3.6, v: 2.6 }; // how far the eyes slide on the face, in mm
 
-export default function WatchingClaude({ src, rig, className = '', squashOnClick = true }) {
+export default function WatchingClaude({ src, rig, className = '', squashOnClick = true, onPress, onRelease }) {
+  const cb = useRef({});
+  cb.current = { onPress, onRelease };
   const boxRef = useRef(null);
   const svgRef = useRef(null);
   const eyeRefs = useRef([]);
@@ -42,8 +44,8 @@ export default function WatchingClaude({ src, rig, className = '', squashOnClick
     };
     const onMove = (ev) => { pointer = toSvg(ev.clientX, ev.clientY); lastMove = performance.now(); };
     const onLeave = () => { pointer = null; };
-    const onDown = () => { pressed = true; squashVel -= 2.2; };
-    const onUp = () => { if (pressed) { pressed = false; squashVel += 4.0; } };
+    const onDown = () => { pressed = true; squashVel -= 2.2; cb.current.onPress?.(); };
+    const onUp = () => { if (pressed) { pressed = false; squashVel += 4.0; cb.current.onRelease?.(); } };
     window.addEventListener('pointermove', onMove);
     document.documentElement.addEventListener('pointerleave', onLeave);
     box.addEventListener('pointerdown', onDown);

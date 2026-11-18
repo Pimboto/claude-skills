@@ -5,6 +5,7 @@ import { LIVE, SOON } from '../skills.js';
 import { GitHubIcon, Arrow } from './Icons.jsx';
 import { subscribe } from './DownloadModal.jsx';
 import Logo from './Logo.jsx';
+import { cue } from '../fx.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -14,10 +15,10 @@ function NotifyForm() {
   const [msg, setMsg] = useState('');
   const send = async (e) => {
     e.preventDefault();
-    if (!EMAIL_RE.test(email.trim())) { setState('error'); setMsg('That email does not look right.'); return; }
+    if (!EMAIL_RE.test(email.trim())) { setState('error'); setMsg('That email does not look right.'); cue('error', { emphasis: 'subtle' }); return; }
     setState('sending');
-    try { await subscribe(email.trim(), 'tutorials'); setState('done'); }
-    catch (err) { setState('error'); setMsg(err.message); }
+    try { await subscribe(email.trim(), 'tutorials'); setState('done'); cue('success', { emphasis: 'subtle' }); }
+    catch (err) { setState('error'); setMsg(err.message); cue('error'); }
   };
   if (state === 'done') return <p className="notify-done">You are on the list. We will write when the first tutorial is out.</p>;
   return (
