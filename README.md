@@ -42,7 +42,8 @@ one to `$DATA_DIR/subscribers.jsonl` (`{email, topic, at}`); no confirmation mai
 volume, so the list survives redeploys.
 
 **Deploy (Dokploy).** Application → this repo → Build type: Dockerfile → port 3000 → mount a volume on `/data` →
-domain. The container has a health check on `/api/health`.
+domain. It works at a domain root or under a path (`pimbo.dev/skills`, with *Strip path* on): every URL in the
+site is relative, and `/skills` redirects to `/skills/`. The container has a health check on `/api/health`.
 
 ## Notes
 

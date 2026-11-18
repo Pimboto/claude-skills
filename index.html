@@ -2,13 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // served under a path (pimbo.dev/skills): without the final slash every relative file would load from the root
+      if (!/\/$|\.[a-z0-9]+$/i.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pimbo Studio: skills for Claude Code</title>
-    <meta name="description" content="Video, animation and analysis skills for Claude Code. Watch what each one makes, then download it from GitHub." />
+    <meta name="description" content="Skills for Claude Code that make videos, animations and pictures. Watch what each one makes, then download it." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="icon" href="/media/favicon.svg" />
+    <link rel="icon" type="image/png" href="media/favicon.png" />
   </head>
   <body>
     <div id="root"></div>
