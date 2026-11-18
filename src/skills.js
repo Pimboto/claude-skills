@@ -5,6 +5,7 @@
 // tile: small picture next to the name; icon: Nucleo icon when there is no tile
 // Text fields can be a plain string or { en, es }.
 // media: { type: 'video' | 'image', src, label, vertical? }  facts: three [label, value] pairs
+// needs / firstTry: go into the install prompt people copy into Claude Code (what to set up, a first request)
 export const SKILLS = [
   {
     id: 'toy-loops',
@@ -29,6 +30,11 @@ export const SKILLS = [
       [{ en: 'Output', es: 'Salida' }, 'GIF · MP4 · web'],
     ],
     meta: ['v1', 'Blender + Python'],
+    needs: {
+      en: 'Blender 5.2 (with `blender` on the PATH, or its path in a BLENDER variable), ffmpeg on the PATH, and Python 3 with numpy and Pillow',
+      es: 'Blender 5.2 (con `blender` en el PATH, o su ruta en una variable BLENDER), ffmpeg en el PATH y Python 3 con numpy y Pillow',
+    },
+    firstTry: { en: 'Make an 8-second loop of Claude waving on a little paper island.', es: 'Haz un loop de 8 segundos de Claude saludando en una islita de papel.' },
   },
   {
     id: 'stage3d-shorts',
@@ -49,6 +55,11 @@ export const SKILLS = [
       [{ en: 'Checks', es: 'Control' }, { en: 'QA on every render', es: 'QA en cada render' }],
     ],
     meta: ['v0.1', 'three.js'],
+    needs: {
+      en: 'Node.js (then `npm install` inside its kit folder), Chrome or Edge, ffmpeg on the PATH, and Python 3 with numpy, opencv-python and scipy',
+      es: 'Node.js (y luego `npm install` dentro de su carpeta kit), Chrome o Edge, ffmpeg en el PATH y Python 3 con numpy, opencv-python y scipy',
+    },
+    firstTry: { en: 'Make a 5-second test short in the black-stage look.', es: 'Haz un short de prueba de 5 segundos con el look de escenario negro.' },
   },
   {
     id: 'hw-shorts',

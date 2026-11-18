@@ -30,6 +30,16 @@ const DICT = {
       ['In the Claude app, upload the .zip in your skills settings, or for Claude Code unzip it into ', '~/.claude/skills/', '.'],
       ['Ask Claude for what you want; the skill tells it how.'],
     ],
+    prompt_title: 'Install it with Claude', copy_prompt: 'Copy prompt', copied: 'Copied', by_hand: 'Or by hand',
+    prompt_sub: 'Copy this prompt and paste it into Claude Code. Claude installs the skill and what it needs, asking you first.',
+    install_prompt: ({ id, name, needs, tryIt }) => `Install the Claude Code skill "${name}" on this computer for me.
+
+1. Get the folder skills/${id} from https://github.com/Pimboto/claude-skills (a shallow, sparse git clone of only that folder is enough).
+2. Put it in my personal skills folder: ~/.claude/skills/${id} (on Windows: %USERPROFILE%\\.claude\\skills\\${id}). If that folder already exists, ask me before replacing it.
+3. Read its SKILL.md. It needs ${needs}. Check what I already have, tell me what is missing, and install it only after I say yes.
+4. When it is ready, tell me in two lines what the skill does and whether I need to restart Claude Code, and give me a first prompt to try, like: "${tryIt}"
+
+Do not change anything else on my computer.`,
     dl_title: (n) => `Download ${n}`,
     dl_text: 'Leave your email and the download starts. We will only write when there is a new skill or tutorial.',
     email_ph: 'you@email.com', download: 'Download', sending: 'Sending…',
@@ -65,6 +75,16 @@ const DICT = {
       ['En la app de Claude, sube el .zip en la configuración de skills; en Claude Code, descomprímelo en ', '~/.claude/skills/', '.'],
       ['Pídele a Claude lo que quieres; la skill le dice cómo.'],
     ],
+    prompt_title: 'Instálala con Claude', copy_prompt: 'Copiar prompt', copied: 'Copiado', by_hand: 'O a mano',
+    prompt_sub: 'Copia este prompt y pégalo en Claude Code. Claude instala la skill y lo que necesita, preguntándote antes.',
+    install_prompt: ({ id, name, needs, tryIt }) => `Instálame la skill de Claude Code "${name}" en este computador.
+
+1. Trae la carpeta skills/${id} de https://github.com/Pimboto/claude-skills (basta con un git clone superficial y sparse de solo esa carpeta).
+2. Ponla en mi carpeta personal de skills: ~/.claude/skills/${id} (en Windows: %USERPROFILE%\\.claude\\skills\\${id}). Si esa carpeta ya existe, pregúntame antes de reemplazarla.
+3. Lee su SKILL.md. Necesita ${needs}. Revisa qué tengo ya, dime qué me falta e instálalo solo cuando te diga que sí.
+4. Cuando esté lista, dime en dos líneas qué hace la skill y si debo reiniciar Claude Code, y dame un primer prompt para probarla, como: "${tryIt}"
+
+No cambies nada más en mi computador.`,
     dl_title: (n) => `Descargar ${n}`,
     dl_text: 'Deja tu correo y la descarga empieza. Solo te escribiremos cuando haya una skill o un tutorial nuevo.',
     email_ph: 'tu@correo.com', download: 'Descargar', sending: 'Enviando…',

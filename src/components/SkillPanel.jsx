@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MetalFx } from 'metal-fx';
 import { LIVE, SOON } from '../skills.js';
 import { SITE, repoLink } from '../site.js';
-import { GitHubIcon, KindIcon, DownloadIcon } from './Icons.jsx';
+import { GitHubIcon, KindIcon, DownloadIcon, CopyIcon, CheckIcon, SparkleIcon } from './Icons.jsx';
 import SkillTile from './SkillTile.jsx';
 import DownloadModal from './DownloadModal.jsx';
 import Logo from './Logo.jsx';
@@ -14,6 +14,45 @@ function Media({ item, label }) {
     return <video src={item.src} autoPlay muted loop playsInline preload="metadata" aria-label={label} />;
   }
   return <img src={item.src} alt={label} loading="lazy" />;
+}
+
+// A ready prompt: pasted into Claude Code, Claude fetches the skill, puts it in ~/.claude/skills and sets up what it needs
+function InstallPrompt({ skill }) {
+  const { t, pick } = useLang();
+  const [copied, setCopied] = useState(false);
+  const pre = useRef(null);
+  const text = t('install_prompt', { id: skill.id, name: skill.name, needs: pick(skill.needs), tryIt: pick(skill.firstTry) });
+  useEffect(() => {
+    if (!copied) return undefined;
+    const id = setTimeout(() => setCopied(false), 1800);
+    return () => clearTimeout(id);
+  }, [copied]);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      cue('success', { emphasis: 'subtle' });
+    } catch {                                   // no clipboard access: select the text so it can be copied by hand
+      const r = document.createRange();
+      r.selectNodeContents(pre.current);
+      const s = window.getSelection();
+      s.removeAllRanges(); s.addRange(r);
+    }
+  };
+  return (
+    <div className="prompt-card">
+      <div className="prompt-head">
+        <div>
+          <h3><SparkleIcon /> {t('prompt_title')}</h3>
+          <p>{t('prompt_sub')}</p>
+        </div>
+        <button className={`btn btn-blue copy-btn ${copied ? 'is-copied' : ''}`} onClick={copy}>
+          {copied ? <CheckIcon /> : <CopyIcon />} <span aria-live="polite">{copied ? t('copied') : t('copy_prompt')}</span>
+        </button>
+      </div>
+      <pre ref={pre} className="prompt-text" data-lenis-prevent>{text}</pre>
+    </div>
+  );
 }
 
 export default function SkillPanel() {
@@ -116,12 +155,16 @@ export default function SkillPanel() {
               ))}
             </div>
           ) : (
-            <div className="install">
-              <ol>
-                {t('install', skill.name).map((parts, i) => (
-                  <li key={i}>{parts.map((p, j) => (j % 2 === 1 ? <code key={j}>{p}</code> : <span key={j}>{p}</span>))}</li>
-                ))}
-              </ol>
+            <div className="install-wrap">
+              {skill.needs && <InstallPrompt skill={skill} />}
+              <div className="install">
+                <p className="install-label">{t('by_hand')}</p>
+                <ol>
+                  {t('install', skill.name).map((parts, i) => (
+                    <li key={i}>{parts.map((p, j) => (j % 2 === 1 ? <code key={j}>{p}</code> : <span key={j}>{p}</span>))}</li>
+                  ))}
+                </ol>
+              </div>
             </div>
           )}
         </section>
