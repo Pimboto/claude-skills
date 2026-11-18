@@ -18,7 +18,11 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4',
   '.zip': 'application/zip', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8', '.woff2': 'font/woff2',
+  '.xml': 'application/xml; charset=utf-8', '.webmanifest': 'application/manifest+json',
 };
+// the old address pimbo.dev/skills (Traefik strips /skills) moves for good to the site's own domain
+const HOME = process.env.HOME_URL || 'https://skills.pimbo.dev';
+const OLD_HOST = /^(www\.)?pimbo\.dev$/i;
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
 const TOPIC_RE = /^[a-z0-9-]{1,40}$/;
 
@@ -88,6 +92,8 @@ http.createServer(async (req, res) => {
     if (p === '/api/subscribe' && req.method === 'POST') return await subscribe(req, res);
     if (p === '/api/health') return json(res, 200, { ok: true });
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
+    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().split(':')[0];
+    if (OLD_HOST.test(host)) { res.writeHead(301, { Location: HOME + req.url, 'Cache-Control': 'public, max-age=3600' }); return res.end(); }
     return serveFile(req, res);
   } catch (err) {
     console.error(err);

@@ -42,8 +42,9 @@ one to `$DATA_DIR/subscribers.jsonl` (`{email, topic, at}`); no confirmation mai
 volume, so the list survives redeploys.
 
 **Deploy (Dokploy).** Application → this repo → Build type: Dockerfile → port 3000 → mount a volume on `/data` →
-domain. It works at a domain root or under a path (`pimbo.dev/skills`, with *Strip path* on): every URL in the
-site is relative, and `/skills` redirects to `/skills/`. The container has a health check on `/api/health`.
+domain. Live at `skills.pimbo.dev` (through the Cloudflare tunnel to Traefik); the old address `pimbo.dev/skills`
+(*Strip path* on) answers with a 301 to it, from `server.mjs`. Every URL in the site is relative, so it also works under
+a path. The container has a health check on `/api/health`.
 
 ## Notes
 

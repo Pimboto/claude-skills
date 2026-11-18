@@ -1,6 +1,5 @@
-# Pimbo Studio (pimbo.dev/skills). Crawlers read robots.txt at the domain root; this copy documents the intent
-# and is used if the site ever moves to its own domain.
+# Pimbo Studio · https://skills.pimbo.dev
 User-agent: *
 Allow: /
 
-Sitemap: https://pimbo.dev/skills/sitemap.xml
+Sitemap: https://skills.pimbo.dev/sitemap.xml
