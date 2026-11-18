@@ -7,15 +7,113 @@
       if (!/\/$|\.[a-z0-9]+$/i.test(location.pathname)) location.replace(location.pathname + '/' + location.search + location.hash);
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pimbo Studio: skills for Claude Code</title>
-    <meta name="description" content="Skills for Claude Code that make videos, animations and pictures. Watch what each one makes, then download it." />
+    <title>Pimbo Studio · Claude Code skills for video, animation and 3D</title>
+    <meta name="description" content="Free Claude Code skills that make videos, 3D animations and pictures: seamless Blender loops, vertical 3D shorts and more. Watch what each skill makes, then download it." />
+    <meta name="keywords" content="Claude Code skills, Claude skills, Blender animation, 3D loops, AI video, Claude, Anthropic, three.js shorts, Pimbo" />
+    <meta name="author" content="Juan Arismendy (Pimbo)" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#1b5fc0" />
+    <link rel="canonical" href="https://pimbo.dev/skills/" />
+    <link rel="alternate" hreflang="en" href="https://pimbo.dev/skills/?lang=en" />
+    <link rel="alternate" hreflang="es" href="https://pimbo.dev/skills/?lang=es" />
+    <link rel="alternate" hreflang="x-default" href="https://pimbo.dev/skills/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pimbo Studio" />
+    <meta property="og:title" content="Pimbo Studio · Claude Code skills for video, animation and 3D" />
+    <meta property="og:description" content="Free Claude Code skills that make videos, 3D animations and pictures. Watch what each one makes, then download it." />
+    <meta property="og:url" content="https://pimbo.dev/skills/" />
+    <meta property="og:image" content="https://pimbo.dev/skills/media/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Pimbo Studio page: Claude, a small paper block, standing on the skills library under a cloudy blue sky" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_CO" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pimbo Studio · Claude Code skills for video, animation and 3D" />
+    <meta name="twitter:description" content="Free Claude Code skills that make videos, 3D animations and pictures." />
+    <meta name="twitter:image" content="https://pimbo.dev/skills/media/og.jpg" />
+
+    <link rel="icon" type="image/png" href="media/favicon.png" />
+    <link rel="apple-touch-icon" href="media/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="media/favicon.png" />
+    <link rel="preload" as="image" href="media/hero-sky.webp" type="image/webp" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://pimbo.dev/skills/#website",
+            "name": "Pimbo Studio",
+            "url": "https://pimbo.dev/skills/",
+            "description": "Claude Code skills that make videos, 3D animations and pictures.",
+            "inLanguage": ["en", "es"],
+            "publisher": { "@id": "https://pimbo.dev/#person" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://pimbo.dev/#person",
+            "name": "Juan Arismendy",
+            "alternateName": "Pimbo",
+            "url": "https://pimbo.dev",
+            "sameAs": ["https://github.com/Pimboto"]
+          },
+          {
+            "@type": "ItemList",
+            "name": "Claude Code skills",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "item": {
+                  "@type": "SoftwareApplication",
+                  "name": "toy-loops",
+                  "applicationCategory": "MultimediaApplication",
+                  "operatingSystem": "Windows, macOS, Linux",
+                  "description": "Seamless 3D loops in a paper-toy look, built in Python and rendered in Blender, animated with the classic animation principles.",
+                  "url": "https://github.com/Pimboto/claude-skills/tree/main/skills/toy-loops",
+                  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+                  "author": { "@id": "https://pimbo.dev/#person" }
+                }
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "item": {
+                  "@type": "SoftwareApplication",
+                  "name": "stage3d-shorts",
+                  "applicationCategory": "MultimediaApplication",
+                  "operatingSystem": "Windows, macOS, Linux",
+                  "description": "Vertical 3D shorts on a black stage: a script with word timings in, a checked MP4 out.",
+                  "url": "https://github.com/Pimboto/claude-skills/tree/main/skills/stage3d-shorts",
+                  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+                  "author": { "@id": "https://pimbo.dev/#person" }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- shown to crawlers and browsers that do not run JavaScript -->
+      <noscript>
+        <h1>Pimbo Studio: Claude Code skills for video, animation and 3D</h1>
+        <p>Free skills for Claude Code that make videos, 3D animations and pictures. Download them from
+          <a href="https://github.com/Pimboto/claude-skills">github.com/Pimboto/claude-skills</a>.</p>
+        <ul>
+          <li><a href="https://github.com/Pimboto/claude-skills/tree/main/skills/toy-loops">toy-loops</a>: seamless 3D loops in a paper-toy look, made in Blender.</li>
+          <li><a href="https://github.com/Pimboto/claude-skills/tree/main/skills/stage3d-shorts">stage3d-shorts</a>: vertical 3D shorts on a black stage.</li>
+        </ul>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

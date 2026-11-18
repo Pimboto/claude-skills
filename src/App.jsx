@@ -1,34 +1,54 @@
 import { useEffect, useState } from 'react';
-import { MetalFx, MetalBadge } from 'metal-fx';
+import { MetalFx } from 'metal-fx';
 import WatchingClaude from './components/WatchingClaude.jsx';
 import SkillPanel from './components/SkillPanel.jsx';
 import Footer from './components/Footer.jsx';
 import Logo from './components/Logo.jsx';
 import { GitHubIcon, Arrow, Chevron, SoundIcon } from './components/Icons.jsx';
-import { startFx, isSoundOn, setSound, squeezeClaude, releaseClaude } from './fx.js';
+import { startFx, isSoundOn, setSound, squeezeClaude, releaseClaude, cue } from './fx.js';
+import { useLang, LANGS } from './i18n.js';
 import { SITE } from './site.js';
 import { SKILLS, LIVE } from './skills.js';
 import rig from './claude-rig.json';
 
 function SoundToggle() {
+  const { t } = useLang();
   const [on, setOn] = useState(isSoundOn);
   return (
     <button className="sound-btn" onClick={() => { setSound(!on); setOn(!on); }} aria-pressed={on}
-      aria-label={on ? 'Turn sound off' : 'Turn sound on'} title={on ? 'Sound on' : 'Sound off'}>
+      aria-label={on ? t('sound_turn_off') : t('sound_turn_on')} title={on ? t('sound_on') : t('sound_off')}>
       <SoundIcon on={on} />
     </button>
   );
 }
 
+// English / Spanish, next to the sound button (Nucleo flags)
+function LangToggle() {
+  const { lang, setLang, t } = useLang();
+  return (
+    <div className="lang" role="group" aria-label={t('language')}>
+      {LANGS.map((l) => (
+        <button key={l.id} className={lang === l.id ? 'on' : ''} aria-pressed={lang === l.id} title={l.name}
+          onClick={() => { if (lang !== l.id) { setLang(l.id); cue('select'); } }}>
+          <img src={l.flag} alt="" width="16" height="16" /> <span>{l.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
+  const { t } = useLang();
   useEffect(() => startFx(), []);
+  const stats = t('stats', LIVE.length, SKILLS.length - LIVE.length);
   return (
     <>
-      <a className="banner" href="#skills" data-cuelume-navigate data-cuelume-emphasis="subtle" style={{ backgroundImage: 'url(media/hero-sky.webp)' }}>
-        <MetalBadge>New</MetalBadge>
-        <span className="long">toy-loops is out: paper 3D animations of Claude, made in Blender.</span>
-        <span className="short">toy-loops is out</span>
-        <span className="banner-btn">Watch it <Arrow /></span>
+      <a className="banner" href="#skills" data-cuelume-navigate data-cuelume-emphasis="subtle">
+        <span className="banner-bg" aria-hidden="true" style={{ backgroundImage: 'url(media/hero-sky.webp)' }} />
+        <span className="chip-new">{t('new')}</span>
+        <span className="long">{t('banner_long')}</span>
+        <span className="short">{t('banner_short')}</span>
+        <span className="banner-btn">{t('banner_btn')} <Arrow /></span>
       </a>
 
       <div className="page" id="top">
@@ -38,36 +58,34 @@ export default function App() {
           <header className="nav wrap">
             <a className="brand" href="#top"><Logo size={24} /> {SITE.name}</a>
             <nav className="nav-links" aria-label="Main" data-cuelume-emphasis="subtle">
-              <a href="#skills" data-cuelume-navigate>Skills <Chevron /></a>
-              <a href="#skills" data-cuelume-navigate>Showreel</a>
-              <a href="#tutorials" data-cuelume-navigate>Tutorials <span className="soon">Soon</span></a>
-              <a href={SITE.github} target="_blank" rel="noreferrer">Docs</a>
+              <a href="#skills" data-cuelume-navigate>{t('nav_skills')} <Chevron /></a>
+              <a href="#skills" data-cuelume-navigate>{t('nav_showreel')}</a>
+              <a href="#tutorials" data-cuelume-navigate>{t('nav_tutorials')} <span className="soon">{t('soon')}</span></a>
+              <a href={SITE.github} target="_blank" rel="noreferrer">{t('nav_docs')}</a>
             </nav>
             <div className="nav-right">
+              <LangToggle />
               <SoundToggle />
-              <a className="gh" href={SITE.github} target="_blank" rel="noreferrer"><GitHubIcon /> Open source</a>
-              <a className="btn btn-blue" href="#skills" data-cuelume-navigate>Get the skills</a>
+              <a className="gh" href={SITE.github} target="_blank" rel="noreferrer"><GitHubIcon /> {t('open_source')}</a>
+              <a className="btn btn-blue" href="#skills" data-cuelume-navigate>{t('get_skills')}</a>
             </div>
           </header>
 
           <div className="wrap hero-grid">
             <div className="hero-copy">
-              <p className="eyebrow">Skills for Claude Code · free on GitHub</p>
-              <h1>Skills that turn Claude into a studio.</h1>
-              <p className="lede">
-                Videos, animations and pictures, each made by a skill you can install. Watch what it makes, then
-                download it.
-              </p>
+              <p className="eyebrow">{t('eyebrow')}</p>
+              <h1>{t('h1')}</h1>
+              <p className="lede">{t('lede')}</p>
               <div className="ctas">
                 <MetalFx preset="chromatic" variant="button" theme="dark">
-                  <a className="metal-pill" href="#skills" data-cuelume-navigate>Browse skills</a>
+                  <a className="metal-pill" href="#skills" data-cuelume-navigate>{t('browse')}</a>
                 </MetalFx>
                 <a className="btn btn-dark" href={SITE.github} target="_blank" rel="noreferrer">
-                  <GitHubIcon /> View on GitHub
+                  <GitHubIcon /> {t('view_github')}
                 </a>
               </div>
               <p className="stats">
-                <b>{LIVE.length}</b> skills out <i>·</i> <b>{SKILLS.length - LIVE.length}</b> on the way <i>·</i> <b>8 s</b> seamless loops
+                <b>{stats[0]}</b>{stats[1]} <i>·</i> <b>{stats[2]}</b>{stats[3]} <i>·</i> <b>{stats[4]}</b>{stats[5]}
               </p>
             </div>
           </div>

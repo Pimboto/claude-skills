@@ -4,22 +4,27 @@ import { downloadLink } from '../site.js';
 import { DownloadIcon } from './Icons.jsx';
 import SkillTile from './SkillTile.jsx';
 import { cue, lockScroll } from '../fx.js';
+import { useLang } from '../i18n.js';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const remembered = () => { try { return localStorage.getItem('ps_email') || ''; } catch { return ''; } };
 const remember = (e) => { try { localStorage.setItem('ps_email', e); } catch { /* private mode */ } };
 
-// Sends the email to the site's own server (POST api/subscribe), then starts the download. No confirmation mail.
+// Sends the email to the site's own server (POST api/subscribe). No confirmation mail.
+// Throws an Error whose message is a dictionary key (email_bad, err_many, err_generic).
 export async function subscribe(email, topic) {
-  const r = await fetch('api/subscribe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, topic }),
-  });
-  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Something went wrong');
+  let r;
+  try {
+    r = await fetch('api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, topic }) });
+  } catch {
+    throw new Error('err_generic');
+  }
+  if (r.ok) return;
+  throw new Error(r.status === 400 ? 'email_bad' : r.status === 429 ? 'err_many' : 'err_generic');
 }
 
 export default function DownloadModal({ skill, onClose }) {
+  const { t } = useLang();
   const [email, setEmail] = useState(remembered);
   const [state, setState] = useState('idle'); // idle | sending | done | error
   const [error, setError] = useState('');
@@ -37,7 +42,7 @@ export default function DownloadModal({ skill, onClose }) {
   const submit = async (e) => {
     e.preventDefault();
     const v = email.trim();
-    if (!EMAIL_RE.test(v)) { setError('That email does not look right.'); setState('error'); cue('error', { emphasis: 'subtle' }); return; }
+    if (!EMAIL_RE.test(v)) { setError('email_bad'); setState('error'); cue('error', { emphasis: 'subtle' }); return; }
     setState('sending'); setError('');
     try {
       await subscribe(v, skill.id);
@@ -56,25 +61,25 @@ export default function DownloadModal({ skill, onClose }) {
   return (
     <div className="modal-back" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="dl-title" data-lenis-prevent>
-        <button className="modal-x" onClick={onClose} aria-label="Close">×</button>
+        <button className="modal-x" onClick={onClose} aria-label={t('close')}>×</button>
         <SkillTile skill={skill} size={52} />
         {state === 'done' ? (
           <>
-            <h3 id="dl-title">Your download started</h3>
-            <p>Thanks! If it did not start, <a className="link" href={downloadLink(skill.id)} download>download {skill.name}.zip</a>.</p>
-            <button className="btn btn-dark" onClick={onClose}>Close</button>
+            <h3 id="dl-title">{t('done_title')}</h3>
+            <p>{t('done_text')} <a className="link" href={downloadLink(skill.id)} download>{skill.name}.zip</a>.</p>
+            <button className="btn btn-dark" onClick={onClose}>{t('close')}</button>
           </>
         ) : (
           <form onSubmit={submit} noValidate>
-            <h3 id="dl-title">Download {skill.name}</h3>
-            <p>Leave your email and the download starts. We will only write when there is a new skill or tutorial.</p>
+            <h3 id="dl-title">{t('dl_title', skill.name)}</h3>
+            <p>{t('dl_text')}</p>
             <div className="field">
               <input
                 ref={input}
                 type="email"
                 inputMode="email"
                 autoComplete="email"
-                placeholder="you@email.com"
+                placeholder={t('email_ph')}
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); if (state === 'error') setState('idle'); }}
                 aria-label="Email"
@@ -82,11 +87,11 @@ export default function DownloadModal({ skill, onClose }) {
               />
               <MetalFx preset="chromatic" variant="button" theme="dark">
                 <button className="metal-pill" type="submit" disabled={state === 'sending'}>
-                  <DownloadIcon /> {state === 'sending' ? 'Sending…' : 'Download'}
+                  <DownloadIcon /> {state === 'sending' ? t('sending') : t('download')}
                 </button>
               </MetalFx>
             </div>
-            {state === 'error' && <p className="err" role="alert">{error}</p>}
+            {state === 'error' && <p className="err" role="alert">{t(error)}</p>}
           </form>
         )}
       </div>

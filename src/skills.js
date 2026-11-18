@@ -3,7 +3,8 @@
 //   2. add an entry here; videos or pictures go in public/media/
 // status: 'live' (shown, downloadable) | 'soon' (shown greyed as coming soon) | 'hidden' (not shown yet)
 // tile: small picture next to the name; icon: Nucleo icon when there is no tile
-// media: { type: 'video' | 'image', src, label, vertical? }  facts: three short [label, value] pairs
+// Text fields can be a plain string or { en, es }.
+// media: { type: 'video' | 'image', src, label, vertical? }  facts: three [label, value] pairs
 export const SKILLS = [
   {
     id: 'toy-loops',
@@ -14,13 +15,19 @@ export const SKILLS = [
     tile: 'media/claude-tile.webp',
     tileBg: 'sky',
     isNew: true,
-    blurb:
-      'Seamless 3D loops in a paper-toy look. Every object is built in Python and rendered in Blender, and the motion follows the classic animation principles: anticipation, squash and stretch, follow-through.',
+    blurb: {
+      en: 'Seamless 3D loops in a paper-toy look. Every object is built in Python and rendered in Blender, and the motion follows the classic animation principles: anticipation, squash and stretch, follow-through.',
+      es: 'Bucles 3D perfectos con look de juguete de papel. Cada objeto se arma en Python y se renderiza en Blender, y el movimiento sigue los principios clásicos de animación: anticipación, estirar y aplastar, acción complementaria.',
+    },
     media: [
-      { type: 'video', src: 'media/toy-loops-island.mp4', label: 'The island' },
-      { type: 'video', src: 'media/toy-loops-campfire.mp4', label: 'The campfire' },
+      { type: 'video', src: 'media/toy-loops-island.mp4', label: { en: 'The island', es: 'La isla' } },
+      { type: 'video', src: 'media/toy-loops-campfire.mp4', label: { en: 'The campfire', es: 'La fogata' } },
     ],
-    facts: [['Loop', '8 s, no seam'], ['Render', '0.7 s / frame'], ['Output', 'GIF · MP4 · web']],
+    facts: [
+      [{ en: 'Loop', es: 'Bucle' }, { en: '8 s, no seam', es: '8 s, sin corte' }],
+      [{ en: 'Render', es: 'Render' }, { en: '0.7 s / frame', es: '0,7 s / cuadro' }],
+      [{ en: 'Output', es: 'Salida' }, 'GIF · MP4 · web'],
+    ],
     meta: ['v1', 'Blender + Python'],
   },
   {
@@ -31,10 +38,16 @@ export const SKILLS = [
     icon: 'Video',
     tile: 'media/tile-stage3d.webp',
     tileBg: 'dark',
-    blurb:
-      'Vertical 3D shorts on a black stage. A script with a timing for every word goes in, a finished MP4 comes out, checked by numbers before it ships.',
+    blurb: {
+      en: 'Vertical 3D shorts on a black stage. A script with a timing for every word goes in, a finished MP4 comes out, checked by numbers before it ships.',
+      es: 'Shorts verticales en 3D sobre un escenario negro. Entra un guion con el tiempo de cada palabra y sale un MP4 terminado, revisado con números antes de publicarse.',
+    },
     media: [{ type: 'video', src: 'media/stage3d-just-later.mp4', label: 'Just Later', vertical: true }],
-    facts: [['Format', '1080 × 1920'], ['Frame rate', '30 fps'], ['Checks', 'QA on every render']],
+    facts: [
+      [{ en: 'Format', es: 'Formato' }, '1080 × 1920'],
+      [{ en: 'Frame rate', es: 'Cuadros' }, '30 fps'],
+      [{ en: 'Checks', es: 'Control' }, { en: 'QA on every render', es: 'QA en cada render' }],
+    ],
     meta: ['v0.1', 'three.js'],
   },
   {
@@ -43,7 +56,7 @@ export const SKILLS = [
     status: 'soon',
     kind: 'Video',
     icon: 'Hardware',
-    blurb: 'Hardware shorts (best GPU, best CPU) in a clean ticket look.',
+    blurb: { en: 'Hardware shorts (best GPU, best CPU) in a clean ticket look.', es: 'Shorts de hardware (mejor GPU, mejor CPU) con un look limpio de tiquete.' },
     media: [],
     facts: [],
   },
@@ -53,7 +66,7 @@ export const SKILLS = [
     status: 'hidden',
     kind: 'Analysis',
     icon: 'Analysis',
-    blurb: 'Studies reference videos frame by frame and turns their craft into numbers.',
+    blurb: { en: 'Studies reference videos frame by frame and turns their craft into numbers.', es: 'Estudia videos de referencia cuadro por cuadro y convierte su oficio en números.' },
     media: [],
     facts: [],
   },
