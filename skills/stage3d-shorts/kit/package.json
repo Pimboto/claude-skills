@@ -1,0 +1,17 @@
+{
+  "name": "stage3d-kit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "stage3d: vertical animated shorts in the black-stage 3D look. One kit (the look), one plan per video.",
+  "scripts": {
+    "video": "node scripts/make_video.cjs",
+    "build": "node scripts/build.cjs",
+    "stills": "node scripts/render.cjs",
+    "check": "node scripts/build.cjs --check-only"
+  },
+  "dependencies": {
+    "esbuild": "0.24.0",
+    "playwright-core": "1.63.0",
+    "three": "0.170.0"
+  }
+}
