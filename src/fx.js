@@ -3,6 +3,7 @@
 // success/error for outcomes, and the playful "bubble" theme only for one moment: squeezing Claude.
 // cuelume is loaded after the page is up (it is a third of the code and nothing can sound before a click anyway).
 import Lenis from 'lenis';
+import { introDone } from './intro.js';
 
 const KEY = 'ps_sound';
 const stored = () => { try { return localStorage.getItem(KEY) !== 'off'; } catch { return true; } };
@@ -28,7 +29,7 @@ let lenis = null;
 export function startFx() {
   let unbind = null, gone = false;
   const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1200));
-  idle(() => loadSound().then((m) => { if (!gone) unbind = m.bind(); }));
+  introDone.then(() => idle(() => loadSound().then((m) => { if (!gone) unbind = m.bind(); })));
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   lenis = reduce ? null : new Lenis({ autoRaf: true, anchors: { offset: -12 }, lerp: 0.09 });
   return () => { gone = true; unbind?.(); lenis?.destroy(); lenis = null; };

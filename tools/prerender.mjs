@@ -38,6 +38,7 @@ function page(lang) {
   const [title, description] = head.map(esc);
   let html = template
     .replace('</head>', `    ${preloads}\n  </head>`)
+    .replace("'__INTRO_IMG__'", `'${asset(/^claude-[\w-]{8}\.webp$/)}'`)
     .replace(/<div id="root">[\s\S]*?<\/noscript>\s*<\/div>/, () => `${intro}\n    <div id="root" data-prerendered="1">${app}</div>`);
   if (!html.includes('data-prerendered')) throw new Error('prerender: #root not found in dist/index.html');
   if (lang === 'es') {

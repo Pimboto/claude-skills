@@ -1,30 +1,61 @@
 import rig from '../claude-rig.json';
 import claudeFull from '../media/claude.webp';
+import skyBlur from '../media/intro-sky.webp?inline';
 
-// The first-visit intro: Claude close up on the blurred sky, winking ^_< (the CSS runs it from the first paint,
-// before any script), then src/intro.js pulls the camera back to the page. It is written into the page's HTML at
-// build time (tools/prerender.mjs), outside the React app, and only shows when the head script sets html.intro-on.
+// The first-visit intro: Claude close up on a blurred sky looks at you, winks ^_< with two sparkles, then
+// src/intro.js pulls the camera back to the page. It is written into the page's HTML at build time
+// (tools/prerender.mjs), outside the React app, and only shows when the head script sets html.intro-on.
+// Everything that moves is its own layer moved by transform and opacity only, so the GPU does it all:
+//   the sky is a 1.7 KB pre-blurred picture inside the HTML (no download, no CSS blur),
+//   each eye state is its own picture over the face, and nothing starts before Claude's picture is decoded.
+const [W, H] = rig.image;
 const WINK = 'right';
 const pts = (shape) => shape.map((p) => p.join(',')).join(' ');
+const pct = (c) => `${(c[0] / W) * 100}% ${(c[1] / H) * 100}%`;
+
+function Eye({ eye, shape, className }) {
+  return (
+    <svg className={className} viewBox={`0 0 ${W} ${H}`} style={{ transformOrigin: pct(eye.c) }}>
+      <polygon transform={`matrix(${eye.ax[0]} ${eye.ax[1]} ${eye.ay[0]} ${eye.ay[1]} ${eye.c[0]} ${eye.c[1]})`} fill={rig.ink}
+        points={pts(rig.shapes_mm[shape][eye.side])} />
+    </svg>
+  );
+}
+
+// A four-point star, the anime wink sparkle
+const Spark = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24">
+    <path d="M12 0C12.9 7.4 16.6 11.1 24 12 16.6 12.9 12.9 16.6 12 24 11.1 16.6 7.4 12.9 0 12 7.4 11.1 11.1 7.4 12 0Z" fill="#fff" />
+  </svg>
+);
+
+// Runs as soon as the intro's HTML is parsed: the show starts when Claude's picture is decoded (at most 2.5 s)
+const BOOT = `(function(){var h=document.documentElement;if(!h.classList.contains('intro-on'))return;
+var i=document.querySelector('#intro .intro-body img'),d=0,r;window.__introReady=new Promise(function(f){r=f});
+function go(){if(d)return;d=1;h.classList.add('intro-ready');r()}
+(i.decode?i.decode():Promise.reject()).then(go,function(){i.complete?go():i.addEventListener('load',go)});setTimeout(go,2500)})();`;
 
 export default function Intro() {
-  const [w, h] = rig.image;
+  const left = rig.eyes.find((e) => e.side !== WINK);
+  const right = rig.eyes.find((e) => e.side === WINK);
   return (
-    <div id="intro" className="intro" aria-hidden="true">
-      <div className="intro-sky" />
-      <div className="intro-claude">
-        <div className="intro-body">
-          <img src={claudeFull} alt="" width={w} height={h} />
-          <svg viewBox={`0 0 ${w} ${h}`}>
-            {rig.eyes.map((e) => (
-              <g key={e.side} transform={`matrix(${e.ax[0]} ${e.ax[1]} ${e.ay[0]} ${e.ay[1]} ${e.c[0]} ${e.c[1]})`} fill={rig.ink}>
-                <polygon className={e.side === WINK ? 'eye-open winks' : 'eye-open'} points={pts(rig.shapes_mm.sq[e.side])} />
-                {e.side === WINK && <polygon className="eye-wink" points={pts(rig.shapes_mm.squeeze[e.side])} />}
-              </g>
-            ))}
-          </svg>
+    <>
+      <div id="intro" className="intro" aria-hidden="true">
+        <div className="intro-sky" style={{ backgroundImage: `url(${skyBlur})` }} />
+        <div className="intro-claude">
+          <div className="intro-pop">
+            <div className="intro-body">
+              <img src={claudeFull} alt="" width={W} height={H} loading="lazy" decoding="async" />
+              <Eye eye={left} shape="sq" className="eye" />
+              <Eye eye={right} shape="sq" className="eye eye-open" />
+              <Eye eye={right} shape="squeeze" className="eye eye-wink" />
+              <Spark className="spark s1" />
+              <Spark className="spark s2" />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      <script dangerouslySetInnerHTML={{ __html: BOOT }} />
+    </>
   );
 }

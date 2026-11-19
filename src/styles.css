@@ -221,26 +221,83 @@ code { font-family: var(--mono); font-size: 12.5px; background: rgba(255, 255, 2
 @keyframes fade { from { opacity: 0; } }
 @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
 
-/* ---------- first visit: Claude close up, winking ^_<, then the camera pulls back (Intro.jsx, intro.js) ---------- */
+/* ---------- first visit: Claude close up, winking ^_<, then the camera pulls back (Intro.jsx, intro.js) ----------
+   Only transform and opacity move (each moving part is its own layer), so it all runs on the GPU. Before
+   html.intro-ready (Claude's picture decoded) only the sky shows; after it the timeline runs:
+   0-0.7 s Claude pops up and looks at you, then a 2.6 s loop whose first 0.8 s is the wink. */
 .intro { display: none; }
-html.intro-on .intro { display: block; position: fixed; inset: 0; z-index: 100; overflow: hidden; container-type: size; cursor: pointer; }
+html.intro-on .intro { display: block; position: fixed; inset: 0; z-index: 100; overflow: hidden; container-type: size;
+  contain: strict; cursor: pointer; }
 html.intro-on .hero-claude { visibility: hidden; }
-.intro-sky { position: absolute; inset: -48px; background-color: var(--hero); background-size: cover; background-position: 70% 30%; filter: blur(18px) saturate(1.2) brightness(0.92); }
+html.intro-on .panel-frame { backdrop-filter: none; }
+.intro-sky { position: absolute; inset: 0; background-color: var(--hero); background-size: cover; background-position: 70% 30%;
+  animation: intro-sky 4.5s cubic-bezier(0.2, 0.6, 0.3, 1) both; }
+/* a soft light behind Claude (it fades with the sky) */
+.intro-sky::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(60cqmax 45cqmax at 50% 52%, rgba(160, 200, 255, 0.28), transparent 70%); }
 /* the face (about 63% x 56% of the picture, centred at 58% of its height) fills most of the screen */
-.intro-claude { --w: min(140cqw, 157cqh); position: absolute; width: var(--w); left: calc(50cqw - var(--w) / 2); top: calc(50cqh - var(--w) * 0.41);
-  transform-origin: 0 0; filter: drop-shadow(0 18px 30px rgba(4, 14, 60, 0.25)); }
-.intro-body { position: relative; transform-origin: 50% 88%;
-  animation: intro-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both, intro-tilt 2.8s ease-in-out 0.1s infinite; }
-.intro-body img, .intro-body svg { display: block; width: 100%; height: auto; }
-.intro-body svg { position: absolute; inset: 0; height: 100%; }
-.intro .eye-open, .intro .eye-wink { transform-box: fill-box; transform-origin: 50% 50%; }
-.intro .winks { animation: eye-shut 2.8s 0.1s infinite; }
-.intro .eye-wink { opacity: 0; animation: eye-wink 2.8s 0.1s infinite; }
-@keyframes intro-in { from { opacity: 0; scale: 0.86; } }
-@keyframes intro-tilt { 0%, 19% { rotate: 0deg; translate: 0 0; } 26%, 42% { rotate: -3deg; translate: 0 -1.2%; } 52%, 100% { rotate: 0deg; translate: 0 0; } }
-@keyframes eye-shut { 0%, 21% { transform: scaleY(1); opacity: 1; } 24.5% { transform: scaleY(0.08); opacity: 1; } 25%, 45% { transform: scaleY(0.08); opacity: 0; }
-  45.5% { transform: scaleY(0.08); opacity: 1; } 49%, 100% { transform: scaleY(1); opacity: 1; } }
-@keyframes eye-wink { 0%, 24.5% { opacity: 0; transform: scale(0.5); } 27% { opacity: 1; transform: scale(1.12); } 30%, 44.5% { opacity: 1; transform: scale(1); } 45%, 100% { opacity: 0; } }
+.intro-claude { --w: min(140cqw, 157cqh); position: absolute; z-index: 1; width: var(--w); left: calc(50cqw - var(--w) / 2);
+  top: calc(50cqh - var(--w) * 0.41); transform-origin: 0 0; }
+.intro-pop { opacity: 0; transform-origin: 50% 90%; }
+.intro-body { position: relative; transform-origin: 50% 85%; }
+.intro-body img { display: block; width: 100%; height: auto; filter: drop-shadow(0 18px 30px rgba(4, 14, 60, 0.25)); }
+.intro .eye { position: absolute; inset: 0; width: 100%; height: 100%; }
+.intro .eye-wink, .intro .spark { opacity: 0; }
+/* beside the winking eye (its centre is at 64% 55.6% of the picture) */
+.intro .spark { position: absolute; width: 9%; left: 70.5%; top: 31.5%; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)); }
+.intro .spark.s2 { width: 5%; left: 78.5%; top: 46.5%; }
+
+html.intro-ready .intro-pop { animation: intro-pop 0.7s both; }
+html.intro-ready .intro-body { animation: intro-wink-body 2.6s 0.7s infinite; }
+html.intro-ready .intro .eye { animation: intro-look 1.15s both; }
+html.intro-ready .intro .eye-open { animation: intro-look 1.15s both, intro-eye-shut 2.6s 0.7s infinite; }
+html.intro-ready .intro .eye-wink { animation: intro-look 1.15s both, intro-eye-wink 2.6s 0.7s infinite; }
+html.intro-ready .intro .spark { animation: intro-spark 2.6s 0.7s infinite; }
+html.intro-ready .intro .spark.s2 { animation-delay: 0.78s; }
+
+@keyframes intro-sky { from { scale: 1.12; } }
+/* up from below with squash and stretch */
+@keyframes intro-pop {
+  0% { opacity: 0; translate: 0 30%; scale: 0.72 0.84; animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  8% { opacity: 1; }
+  60% { translate: 0 -3%; scale: 1.05 0.96; animation-timing-function: ease-in-out; }
+  82% { translate: 0 0.8%; scale: 0.985 1.02; animation-timing-function: ease-in-out; }
+  100% { opacity: 1; translate: 0 0; scale: 1; }
+}
+/* the eyes arrive looking up and to the side, then find you */
+@keyframes intro-look {
+  0%, 40% { translate: -2.6% -1.8%; }
+  70% { translate: 0.7% 0.4%; animation-timing-function: ease-out; }
+  100% { translate: 0 0; }
+}
+/* the wink: a small squash (anticipation), a tilt toward the winking eye that overshoots, then back */
+@keyframes intro-wink-body {
+  0% { rotate: 0deg; scale: 1; animation-timing-function: ease-in; }
+  5% { rotate: 0deg; scale: 1.03 0.96; animation-timing-function: cubic-bezier(0.3, 1.6, 0.5, 1); }
+  11% { rotate: -5deg; scale: 0.985 1.025; animation-timing-function: ease-out; }
+  15%, 24% { rotate: -3.5deg; scale: 1; animation-timing-function: ease-in-out; }
+  29% { rotate: 0.8deg; }
+  33%, 100% { rotate: 0deg; scale: 1; }
+}
+@keyframes intro-eye-shut {
+  0%, 6% { scale: 1 1; opacity: 1; animation-timing-function: ease-in; }
+  9% { scale: 1 0.08; opacity: 1; }
+  9.5%, 25% { scale: 1 0.08; opacity: 0; }
+  25.5% { scale: 1 0.08; opacity: 1; animation-timing-function: ease-out; }
+  30%, 100% { scale: 1 1; opacity: 1; }
+}
+@keyframes intro-eye-wink {
+  0%, 9% { opacity: 0; scale: 0.4; animation-timing-function: cubic-bezier(0.3, 1.8, 0.5, 1); }
+  13% { opacity: 1; scale: 1; }
+  24% { opacity: 1; scale: 1; animation-timing-function: ease-in; }
+  25.5%, 100% { opacity: 0; scale: 0.6; }
+}
+@keyframes intro-spark {
+  0%, 10% { opacity: 0; scale: 0; rotate: 0deg; animation-timing-function: cubic-bezier(0.3, 1.6, 0.5, 1); }
+  15% { opacity: 1; scale: 1; rotate: 70deg; animation-timing-function: ease-in-out; }
+  20% { opacity: 1; scale: 0.8; rotate: 95deg; animation-timing-function: ease-in; }
+  27%, 100% { opacity: 0; scale: 0; rotate: 130deg; }
+}
 
 /* ---------- footer ---------- */
 .footer { position: relative; background: var(--page); overflow: hidden; color: var(--text-3); font-size: 13px; }

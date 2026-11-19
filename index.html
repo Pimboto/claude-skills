@@ -38,11 +38,30 @@
     <link rel="apple-touch-icon" href="media/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
     <script>
-      // first visit: the page opens on Claude's face, winking (src/intro.js); ?intro shows it again
+      // first visit: the page opens on Claude's face, winking (src/intro.js); ?intro shows it again. Meanwhile scrolling
+      // is held (a scroll or a scroll key skips ahead) and Claude's picture is fetched first.
       try {
-        if ((/[?&]intro/.test(location.search) || !localStorage.getItem('ps_intro')) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          document.documentElement.classList.add('intro-on');
-          setTimeout(function () { if (!window.__intro) document.documentElement.classList.remove('intro-on'); }, 8000);
+        if ((/[?&]intro\b/.test(location.search) || !localStorage.getItem('ps_intro')) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          var h = document.documentElement, img = '__INTRO_IMG__', keys = /^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/;
+          h.classList.add('intro-on');
+          if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+          if (img.indexOf('__') < 0) {
+            var l = document.createElement('link');
+            l.rel = 'preload'; l.as = 'image'; l.href = img; l.setAttribute('fetchpriority', 'high');
+            document.head.appendChild(l);
+          }
+          var hold = function (e) {
+            if (e.type === 'keydown' && !keys.test(e.key)) return;
+            e.preventDefault(); e.stopImmediatePropagation();
+            window.__introSkip = 1; dispatchEvent(new Event('introskip'));
+          };
+          var opt = { capture: true, passive: false };
+          ['wheel', 'touchmove', 'keydown'].forEach(function (n) { addEventListener(n, hold, opt); });
+          window.__introUnblock = function () {
+            ['wheel', 'touchmove', 'keydown'].forEach(function (n) { removeEventListener(n, hold, opt); });
+            if ('scrollRestoration' in history) history.scrollRestoration = 'auto';
+          };
+          setTimeout(function () { if (!window.__intro) { h.classList.remove('intro-on', 'intro-ready'); window.__introUnblock(); } }, 8000);
         }
       } catch (e) {}
     </script>

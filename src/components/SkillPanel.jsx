@@ -9,8 +9,10 @@ import Logo from './Logo.jsx';
 import { cue } from '../fx.js';
 import { useLang } from '../i18n.js';
 import noSound from '../media/no-sound.vtt?url';
+import { introDone } from '../intro.js';
 
-// Videos load when they come near the screen and pause when they leave it. They are silent; the captions say so.
+// Videos load when they come near the screen (not during the intro) and pause when they leave it. They are
+// silent; the captions say so.
 function Media({ item, label }) {
   const ref = useRef(null);
   const [near, setNear] = useState(false);
@@ -20,8 +22,9 @@ function Media({ item, label }) {
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) { setNear(true); v.play().catch(() => {}); } else if (!v.paused) v.pause();
     }, { rootMargin: '300px 0px' });
-    io.observe(v);
-    return () => io.disconnect();
+    let gone = false;
+    introDone.then(() => { if (!gone) io.observe(v); });
+    return () => { gone = true; io.disconnect(); };
   }, []);
   if (item.type === 'video') {
     return (
