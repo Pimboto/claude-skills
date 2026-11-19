@@ -4,5 +4,6 @@ data
 capturas
 skills
 tools
+!tools/prerender.mjs
 .git
 *.md

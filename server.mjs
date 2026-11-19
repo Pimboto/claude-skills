@@ -2,8 +2,11 @@
 // Node built-ins only. Emails go to $DATA_DIR/subscribers.jsonl (one JSON object per line); mount DATA_DIR as a volume.
 //   node server.mjs            PORT=3000 DATA_DIR=./data by default
 // Routes: POST /api/subscribe {email, topic}  ·  GET /api/health  ·  everything else: static files from dist/
+// The page comes in English (index.html) or Spanish (index.es.html): ?lang=, else the ps_lang cookie, else the
+// browser's first language. Text files go out compressed (brotli or gzip, made once and kept in memory).
 import http from 'node:http';
-import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
+import { brotliCompressSync, gzipSync, constants as Z } from 'node:zlib';
 import { appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,8 +21,10 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4',
   '.zip': 'application/zip', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8', '.woff2': 'font/woff2',
-  '.xml': 'application/xml; charset=utf-8', '.webmanifest': 'application/manifest+json',
+  '.xml': 'application/xml; charset=utf-8', '.webmanifest': 'application/manifest+json', '.avif': 'image/avif',
+  '.vtt': 'text/vtt; charset=utf-8',
 };
+const COMPRESS = new Set(['.html', '.js', '.css', '.json', '.svg', '.txt', '.xml', '.webmanifest', '.vtt']);
 // the old address pimbo.dev/skills (Traefik strips /skills) moves for good to the site's own domain
 const HOME = process.env.HOME_URL || 'https://skills.pimbo.dev';
 const OLD_HOST = /^(www\.)?pimbo\.dev$/i;
@@ -59,20 +64,62 @@ async function subscribe(req, res) {
   return json(res, 200, { ok: true });
 }
 
+const PAGE = path.join(ROOT, 'index.html');
+function pageLang(req, url) {
+  const q = url.searchParams.get('lang');
+  if (q === 'en' || q === 'es') return q;
+  const c = /(?:^|;\s*)ps_lang=(en|es)/.exec(req.headers.cookie || '');
+  if (c) return c[1];
+  return /^\s*es(-|;|,|$)/i.test(req.headers['accept-language'] || '') ? 'es' : 'en';
+}
+
+const packed = new Map(); // file -> { mtime, br, gzip }
+function packedBody(file, enc) {
+  const mtime = statSync(file).mtimeMs;
+  let p = packed.get(file);
+  if (!p || p.mtime !== mtime) {
+    const raw = readFileSync(file);
+    p = { mtime, br: brotliCompressSync(raw, { params: { [Z.BROTLI_PARAM_QUALITY]: 11 } }), gzip: gzipSync(raw, { level: 9 }) };
+    packed.set(file, p);
+  }
+  return p[enc];
+}
+
 function serveFile(req, res) {
-  let rel = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const url = new URL(req.url, 'http://x');
+  const rel = decodeURIComponent(url.pathname);
   let file = path.normalize(path.join(ROOT, rel));
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
   if (existsSync(file) && statSync(file).isDirectory()) file = path.join(file, 'index.html');
-  if (!existsSync(file)) file = path.join(ROOT, 'index.html');          // single page: unknown paths get the app
+  if (!existsSync(file)) {
+    // a missing file (a name with an extension, or a /.well-known/ probe) is a real 404; other paths get the page
+    if (path.extname(rel) || rel.startsWith('/.well-known/')) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' });
+      return res.end('Not found');
+    }
+    file = PAGE;
+  }
+  const vary = ['Accept-Encoding'];
+  if (file === PAGE) {
+    vary.push('Accept-Language', 'Cookie');
+    if (pageLang(req, url) === 'es') file = path.join(ROOT, 'index.es.html');
+  }
   const ext = path.extname(file).toLowerCase();
   const size = statSync(file).size;
   const headers = {
     'Content-Type': TYPES[ext] || 'application/octet-stream',
     'Cache-Control': ext === '.html' ? 'no-cache' : rel.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'public, max-age=3600',
     'X-Content-Type-Options': 'nosniff',
+    Vary: vary.join(', '),
   };
   if (ext === '.zip') headers['Content-Disposition'] = `attachment; filename="${path.basename(file)}"`;
+  const accept = String(req.headers['accept-encoding'] || '').split(',').map((e) => e.split(';')[0].trim());
+  const enc = !COMPRESS.has(ext) ? null : accept.includes('br') ? 'br' : accept.includes('gzip') ? 'gzip' : null;
+  if (enc) {
+    const body = packedBody(file, enc);
+    res.writeHead(200, { ...headers, 'Content-Encoding': enc, 'Content-Length': body.length });
+    return res.end(req.method === 'HEAD' ? undefined : body);
+  }
   // videos need byte ranges for Safari
   const range = req.headers.range && /bytes=(\d*)-(\d*)/.exec(req.headers.range);
   if (range && ext === '.mp4') {

@@ -1,10 +1,12 @@
 // English and Spanish. The language is the visitor's choice (remembered), else the browser's language.
 // useLang() gives { lang, t, setLang, pick }: t(key, ...args) for UI text, pick({en, es}) for skill content.
 import { useSyncExternalStore } from 'react';
+import flagEn from './media/flag-en.svg';
+import flagEs from './media/flag-es.svg';
 
 export const LANGS = [
-  { id: 'en', label: 'EN', name: 'English', flag: 'media/flag-en.svg' },
-  { id: 'es', label: 'ES', name: 'Español', flag: 'media/flag-es.svg' },
+  { id: 'en', label: 'EN', name: 'English', flag: flagEn },
+  { id: 'es', label: 'ES', name: 'Español', flag: flagEs },
 ];
 
 const DICT = {
@@ -101,6 +103,13 @@ No cambies nada más en mi computador.`,
 };
 
 const KEY = 'ps_lang';
+const isBrowser = typeof window !== 'undefined';
+// the language the page's HTML was rendered in (the server picks it the same way, with a cookie in place of
+// localStorage); hydration starts from it, then switches if the visitor's choice differs
+let htmlLang = isBrowser && document.documentElement.lang === 'es' ? 'es' : 'en';
+export const setRenderLang = (l) => { htmlLang = l; };
+const saveCookie = (l) => { document.cookie = `${KEY}=${l}; path=/; max-age=31536000; samesite=lax`; };
+
 function initial() {
   const q = new URLSearchParams(location.search).get('lang');    // ?lang=es links (hreflang, sharing)
   if (q === 'en' || q === 'es') return q;
@@ -111,19 +120,21 @@ function initial() {
   return (navigator.language || 'en').toLowerCase().startsWith('es') ? 'es' : 'en';
 }
 
-let lang = typeof window === 'undefined' ? 'en' : initial();
+let lang = isBrowser ? initial() : 'en';
+if (isBrowser) saveCookie(lang);
 const subs = new Set();
 
 export function setLang(next) {
   if (next === lang) return;
   lang = next;
   try { localStorage.setItem(KEY, next); } catch { /* private mode */ }
+  saveCookie(next);
   applyHead();
   subs.forEach((f) => f());
 }
 
 // the tab title and description follow the language
-const HEAD = {
+export const HEAD = {
   en: ['Pimbo Studio · Claude Code skills for video, animation and 3D',
     'Free Claude Code skills that make videos, 3D animations and pictures: seamless Blender loops, vertical 3D shorts and more. Watch what each skill makes, then download it.'],
   es: ['Pimbo Studio · Skills de Claude Code para video, animación y 3D',
@@ -138,13 +149,14 @@ function applyHead() {
 applyHead();
 
 const subscribe = (f) => { subs.add(f); return () => subs.delete(f); };
-const t = (key, ...args) => {
-  const v = DICT[lang][key] ?? DICT.en[key] ?? key;
+const tIn = (l) => (key, ...args) => {
+  const v = DICT[l][key] ?? DICT.en[key] ?? key;
   return typeof v === 'function' ? v(...args) : v;
 };
-const pick = (v) => (v && typeof v === 'object' && !Array.isArray(v) && ('en' in v || 'es' in v) ? v[lang] ?? v.en : v);
+const pickIn = (l) => (v) => (v && typeof v === 'object' && !Array.isArray(v) && ('en' in v || 'es' in v) ? v[l] ?? v.en : v);
+const BOUND = { en: { t: tIn('en'), pick: pickIn('en') }, es: { t: tIn('es'), pick: pickIn('es') } };
 
 export function useLang() {
-  const current = useSyncExternalStore(subscribe, () => lang, () => 'en');
-  return { lang: current, t, pick, setLang };
+  const current = useSyncExternalStore(subscribe, () => lang, () => htmlLang);
+  return { lang: current, ...BOUND[current], setLang };
 }

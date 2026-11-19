@@ -1,11 +1,21 @@
 // The skill library. To publish a new skill:
 //   1. put its source in skills/<id>/ and run `python tools/pack_skills.py` (writes public/downloads/<id>.zip)
-//   2. add an entry here; videos or pictures go in public/media/
+//   2. add an entry here; videos or pictures go in src/media/ and are imported below (the build gives them
+//      names that change with their content, so browsers can keep them for a year)
 // status: 'live' (shown, downloadable) | 'soon' (shown greyed as coming soon) | 'hidden' (not shown yet)
 // tile: small picture next to the name; icon: Nucleo icon when there is no tile
 // Text fields can be a plain string or { en, es }.
-// media: { type: 'video' | 'image', src, label, vertical? }  facts: three [label, value] pairs
+// media: { type: 'video' | 'image', src, poster?, w, h, label, vertical? }  facts: three [label, value] pairs
 // needs / firstTry: go into the install prompt people copy into Claude Code (what to set up, a first request)
+import claudeTile from './media/claude-tile.webp';
+import stage3dTile from './media/tile-stage3d.webp';
+import island from './media/toy-loops-island.mp4';
+import islandPoster from './media/toy-loops-island-poster.webp';
+import campfire from './media/toy-loops-campfire.mp4';
+import campfirePoster from './media/toy-loops-campfire-poster.webp';
+import justLater from './media/stage3d-just-later.mp4';
+import justLaterPoster from './media/stage3d-just-later-poster.webp';
+
 export const SKILLS = [
   {
     id: 'toy-loops',
@@ -13,7 +23,7 @@ export const SKILLS = [
     status: 'live',
     kind: 'Animation',
     icon: 'Animation',
-    tile: 'media/claude-tile.webp',
+    tile: claudeTile,
     tileBg: 'sky',
     isNew: true,
     blurb: {
@@ -21,8 +31,8 @@ export const SKILLS = [
       es: 'Bucles 3D perfectos con look de juguete de papel. Cada objeto se arma en Python y se renderiza en Blender, y el movimiento sigue los principios clásicos de animación: anticipación, estirar y aplastar, acción complementaria.',
     },
     media: [
-      { type: 'video', src: 'media/toy-loops-island.mp4', label: { en: 'The island', es: 'La isla' } },
-      { type: 'video', src: 'media/toy-loops-campfire.mp4', label: { en: 'The campfire', es: 'La fogata' } },
+      { type: 'video', src: island, poster: islandPoster, w: 720, h: 720, label: { en: 'The island', es: 'La isla' } },
+      { type: 'video', src: campfire, poster: campfirePoster, w: 720, h: 720, label: { en: 'The campfire', es: 'La fogata' } },
     ],
     facts: [
       [{ en: 'Loop', es: 'Bucle' }, { en: '8 s, no seam', es: '8 s, sin corte' }],
@@ -42,13 +52,13 @@ export const SKILLS = [
     status: 'live',
     kind: 'Video',
     icon: 'Video',
-    tile: 'media/tile-stage3d.webp',
+    tile: stage3dTile,
     tileBg: 'dark',
     blurb: {
       en: 'Vertical 3D shorts on a black stage. A script with a timing for every word goes in, a finished MP4 comes out, checked by numbers before it ships.',
       es: 'Shorts verticales en 3D sobre un escenario negro. Entra un guion con el tiempo de cada palabra y sale un MP4 terminado, revisado con números antes de publicarse.',
     },
-    media: [{ type: 'video', src: 'media/stage3d-just-later.mp4', label: 'Just Later', vertical: true }],
+    media: [{ type: 'video', src: justLater, poster: justLaterPoster, w: 540, h: 960, label: 'Just Later', vertical: true }],
     facts: [
       [{ en: 'Format', es: 'Formato' }, '1080 × 1920'],
       [{ en: 'Frame rate', es: 'Cuadros' }, '30 fps'],

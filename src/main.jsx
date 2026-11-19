@@ -1,11 +1,13 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App.jsx';
+import '@fontsource-variable/mona-sans/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
 import 'lenis/dist/lenis.css';
 import './styles.css';
 
-createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-);
+// the built page arrives already rendered (tools/prerender.mjs); in development it is drawn from scratch
+const root = document.getElementById('root');
+const app = <React.StrictMode><App /></React.StrictMode>;
+if (root.dataset.prerendered) hydrateRoot(root, app);
+else createRoot(root).render(app);

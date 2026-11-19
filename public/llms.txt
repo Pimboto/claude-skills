@@ -1,0 +1,19 @@
+# Pimbo Studio
+
+> Free Claude Code skills that make videos, 3D animations and pictures. Each skill is a folder with a SKILL.md that tells Claude how to do the work; download it here or take it from GitHub.
+
+The site is in English and Spanish (`?lang=es`). Skills are free and open source.
+
+## Skills
+
+- [toy-loops](https://github.com/Pimboto/claude-skills/tree/main/skills/toy-loops): seamless 3D loops in a paper-toy look, built in Python and rendered in Blender (needs Blender 5.2, ffmpeg, Python 3 with numpy and Pillow).
+- [stage3d-shorts](https://github.com/Pimboto/claude-skills/tree/main/skills/stage3d-shorts): vertical 3D shorts on a black stage, from a script with word timings to a checked MP4 (needs Node.js, Chrome or Edge, ffmpeg, Python 3).
+
+## Install
+
+- [Source on GitHub](https://github.com/Pimboto/claude-skills): copy `skills/<name>` into `~/.claude/skills/<name>`.
+- Downloads: [toy-loops.zip](https://skills.pimbo.dev/downloads/toy-loops.zip), [stage3d-shorts.zip](https://skills.pimbo.dev/downloads/stage3d-shorts.zip) (the site asks for an email first).
+
+## Optional
+
+- [Author](https://pimbo.dev): Pimbo (Juan Arismendy), full-stack developer.

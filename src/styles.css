@@ -1,8 +1,8 @@
 /* Measured from the ServerOS landing page (2026-11-18) and adapted: Mona Sans, 52px light headline,
    13px copy, 32px buttons with an 8px radius, a 1248px container, a glass frame around a dark app panel. */
 :root {
-  --font: 'Mona Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font: 'Mona Sans Variable', 'Mona Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
   --hero: #1b5fc0;
   --page: #161616;
   --body: #0a0a0a;
@@ -23,6 +23,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .nc { flex-shrink: 0; --nucleo-stroke-width: 1.5; }
 .nc [stroke-width] { stroke-width: var(--nucleo-stroke-width); }
 .banner .short { display: none; }
+/* the sky picture (hero, banner, intro): AVIF where the browser takes it; phones get its clear left part */
+.hero-sky, .banner-bg, .intro-sky {
+  background-image: url('./media/hero-sky.webp');
+  background-image: image-set(url('./media/hero-sky.avif') type('image/avif'), url('./media/hero-sky.webp') type('image/webp'));
+}
 .metal-pill .nc { margin-right: 7px; }
 
 /* ---------- top banner (tucks under the page's rounded top) ---------- */
@@ -188,7 +193,7 @@ code { font-family: var(--mono); font-size: 12.5px; background: rgba(255, 255, 2
   letter-spacing: 0.02em; color: #c9d5ff; background: rgba(120, 150, 255, 0.14); box-shadow: inset 0 0 0 0.5px rgba(160, 185, 255, 0.4); margin-left: 6px; }
 .soon.big { height: 22px; padding: 0 10px; font-size: 12px; margin: 0 8px 0 0; }
 .nav-links .soon { margin-left: 2px; }
-.side-item.off { opacity: 0.45; cursor: default; }
+.side-item.off { opacity: 0.65; cursor: default; }
 .side-item.off:hover { background: none; color: rgba(255, 255, 255, 0.72); }
 .side-item .tile { box-shadow: none; }
 .tile.has-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -216,10 +221,31 @@ code { font-family: var(--mono); font-size: 12.5px; background: rgba(255, 255, 2
 @keyframes fade { from { opacity: 0; } }
 @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
 
+/* ---------- first visit: Claude close up, winking ^_<, then the camera pulls back (Intro.jsx, intro.js) ---------- */
+.intro { display: none; }
+html.intro-on .intro { display: block; position: fixed; inset: 0; z-index: 100; overflow: hidden; container-type: size; cursor: pointer; }
+html.intro-on .hero-claude { visibility: hidden; }
+.intro-sky { position: absolute; inset: -48px; background-color: var(--hero); background-size: cover; background-position: 70% 30%; filter: blur(18px) saturate(1.2) brightness(0.92); }
+/* the face (about 63% x 56% of the picture, centred at 58% of its height) fills most of the screen */
+.intro-claude { --w: min(140cqw, 157cqh); position: absolute; width: var(--w); left: calc(50cqw - var(--w) / 2); top: calc(50cqh - var(--w) * 0.41);
+  transform-origin: 0 0; filter: drop-shadow(0 18px 30px rgba(4, 14, 60, 0.25)); }
+.intro-body { position: relative; transform-origin: 50% 88%;
+  animation: intro-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both, intro-tilt 2.8s ease-in-out 0.1s infinite; }
+.intro-body img, .intro-body svg { display: block; width: 100%; height: auto; }
+.intro-body svg { position: absolute; inset: 0; height: 100%; }
+.intro .eye-open, .intro .eye-wink { transform-box: fill-box; transform-origin: 50% 50%; }
+.intro .winks { animation: eye-shut 2.8s 0.1s infinite; }
+.intro .eye-wink { opacity: 0; animation: eye-wink 2.8s 0.1s infinite; }
+@keyframes intro-in { from { opacity: 0; scale: 0.86; } }
+@keyframes intro-tilt { 0%, 19% { rotate: 0deg; translate: 0 0; } 26%, 42% { rotate: -3deg; translate: 0 -1.2%; } 52%, 100% { rotate: 0deg; translate: 0 0; } }
+@keyframes eye-shut { 0%, 21% { transform: scaleY(1); opacity: 1; } 24.5% { transform: scaleY(0.08); opacity: 1; } 25%, 45% { transform: scaleY(0.08); opacity: 0; }
+  45.5% { transform: scaleY(0.08); opacity: 1; } 49%, 100% { transform: scaleY(1); opacity: 1; } }
+@keyframes eye-wink { 0%, 24.5% { opacity: 0; transform: scale(0.5); } 27% { opacity: 1; transform: scale(1.12); } 30%, 44.5% { opacity: 1; transform: scale(1); } 45%, 100% { opacity: 0; } }
+
 /* ---------- footer ---------- */
 .footer { position: relative; background: var(--page); overflow: hidden; color: var(--text-3); font-size: 13px; }
 .cta-band { position: relative; padding: 120px 0 110px; background: linear-gradient(180deg, var(--hero) 0%, #10307a 55%, var(--page) 100%); }
-.cta-art { position: absolute; inset: 0 0 0 40%; background-size: cover; background-position: 62% 45%;
+.cta-art { position: absolute; inset: 0 0 0 40%; background: url('./media/footer-director.webp') no-repeat; background-size: cover; background-position: 62% 45%;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%), linear-gradient(180deg, transparent, #000 18%, #000 70%, transparent);
   -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0%, #000 34%), linear-gradient(180deg, transparent, #000 18%, #000 70%, transparent);
   mask-composite: intersect; opacity: 0.95; }
@@ -234,12 +260,12 @@ code { font-family: var(--mono); font-size: 12.5px; background: rgba(255, 255, 2
 .foot-brand .brand { color: #fff; margin-bottom: 14px; }
 .foot-brand p { margin: 0 0 18px; line-height: 20px; max-width: 320px; }
 .foot-col { display: flex; flex-direction: column; gap: 11px; }
-.foot-col h4 { margin: 0 0 4px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); }
+.foot-col h3 { margin: 0 0 4px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
 .foot-col a { color: rgba(255, 255, 255, 0.78); display: inline-flex; align-items: center; gap: 6px; width: fit-content; }
 .foot-col a:hover { color: #fff; }
-.foot-col .muted { color: rgba(255, 255, 255, 0.4); }
+.foot-col .muted { color: rgba(255, 255, 255, 0.5); }
 .foot-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 22px; padding-bottom: 26px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07); font-size: 12px; color: rgba(255, 255, 255, 0.38); }
+  border-top: 1px solid rgba(255, 255, 255, 0.07); font-size: 12px; color: rgba(255, 255, 255, 0.5); }
 .wordmark { text-align: center; font-weight: 600; letter-spacing: -0.06em; line-height: 0.78; white-space: nowrap;
   font-size: clamp(64px, 15.5vw, 250px); margin-top: 6px; transform: translateY(14%); user-select: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.015)); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -252,7 +278,11 @@ code { font-family: var(--mono); font-size: 12.5px; background: rgba(255, 255, 2
   .lang button { padding: 0 7px; }
   .banner .short { display: inline; }
   /* the clouds sit behind the copy on narrow screens: show the clear sky and darken the top for contrast */
-  .hero-sky { background-position: 12% 0; }
+  .hero-sky { background-position: 23% 0; }
+  .hero-sky, .banner-bg, .intro-sky {
+    background-image: url('./media/hero-sky-phone.webp');
+    background-image: image-set(url('./media/hero-sky-phone.avif') type('image/avif'), url('./media/hero-sky-phone.webp') type('image/webp'));
+  }
   .hero::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 760px; z-index: 1; pointer-events: none;
     background: linear-gradient(rgba(16, 52, 150, 0.72), rgba(16, 52, 150, 0.45) 55%, transparent); }
   .hero-grid { padding-top: 56px; }

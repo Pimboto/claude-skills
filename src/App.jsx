@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react';
-import { MetalFx } from 'metal-fx';
+import Metal from './components/Metal.jsx';
 import WatchingClaude from './components/WatchingClaude.jsx';
 import SkillPanel from './components/SkillPanel.jsx';
 import Footer from './components/Footer.jsx';
 import Logo from './components/Logo.jsx';
 import { GitHubIcon, Arrow, Chevron, SoundIcon } from './components/Icons.jsx';
 import { startFx, isSoundOn, setSound, squeezeClaude, releaseClaude, cue } from './fx.js';
+import { runIntro } from './intro.js';
 import { useLang, LANGS } from './i18n.js';
 import { SITE } from './site.js';
 import { SKILLS, LIVE } from './skills.js';
 import rig from './claude-rig.json';
+import claude560 from './media/claude-560.webp';
+import claudeFull from './media/claude.webp';
 
 function SoundToggle() {
   const { t } = useLang();
-  const [on, setOn] = useState(isSoundOn);
+  const [on, setOn] = useState(true);             // the page's HTML is rendered with sound on; the saved choice comes after
+  useEffect(() => setOn(isSoundOn()), []);
   return (
     <button className="sound-btn" onClick={() => { setSound(!on); setOn(!on); }} aria-pressed={on}
       aria-label={on ? t('sound_turn_off') : t('sound_turn_on')} title={on ? t('sound_on') : t('sound_off')}>
@@ -39,12 +43,12 @@ function LangToggle() {
 
 export default function App() {
   const { t } = useLang();
-  useEffect(() => startFx(), []);
+  useEffect(() => { const stop = startFx(); runIntro(); return stop; }, []);
   const stats = t('stats', LIVE.length, SKILLS.length - LIVE.length);
   return (
     <>
       <a className="banner" href="#skills" data-cuelume-navigate data-cuelume-emphasis="subtle">
-        <span className="banner-bg" aria-hidden="true" style={{ backgroundImage: 'url(media/hero-sky.webp)' }} />
+        <span className="banner-bg" aria-hidden="true" />
         <span className="chip-new">{t('new')}</span>
         <span className="long">{t('banner_long')}</span>
         <span className="short">{t('banner_short')}</span>
@@ -52,8 +56,8 @@ export default function App() {
       </a>
 
       <div className="page" id="top">
-        <section className="hero">
-          <div className="hero-sky" style={{ backgroundImage: 'url(media/hero-sky.webp)' }} />
+        <main className="hero">
+          <div className="hero-sky" />
 
           <header className="nav wrap">
             <a className="brand" href="#top"><Logo size={24} /> {SITE.name}</a>
@@ -77,9 +81,9 @@ export default function App() {
               <h1>{t('h1')}</h1>
               <p className="lede">{t('lede')}</p>
               <div className="ctas">
-                <MetalFx preset="chromatic" variant="button" theme="dark">
+                <Metal preset="chromatic" variant="button" theme="dark">
                   <a className="metal-pill" href="#skills" data-cuelume-navigate>{t('browse')}</a>
-                </MetalFx>
+                </Metal>
                 <a className="btn btn-dark" href={SITE.github} target="_blank" rel="noreferrer">
                   <GitHubIcon /> {t('view_github')}
                 </a>
@@ -91,10 +95,11 @@ export default function App() {
           </div>
 
           <div className="wrap stage">
-            <WatchingClaude className="hero-claude" src="media/claude.webp" rig={rig} onPress={squeezeClaude} onRelease={releaseClaude} />
+            <WatchingClaude className="hero-claude" src={claudeFull} srcSet={`${claude560} 560w, ${claudeFull} 1075w`}
+              sizes="(max-width: 980px) min(360px, 80vw), 440px" rig={rig} onPress={squeezeClaude} onRelease={releaseClaude} />
             <SkillPanel />
           </div>
-        </section>
+        </main>
 
         <Footer />
       </div>

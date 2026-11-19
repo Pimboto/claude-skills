@@ -25,7 +25,7 @@ Nucleo icons.
 ```
 npm install
 npm run dev            # http://localhost:5173
-npm run build          # static files in dist/
+npm run build          # dist/, the page already rendered in English and Spanish (tools/prerender.mjs)
 node server.mjs        # serves dist/ and stores sign-ups (PORT=3000, DATA_DIR=./data)
 ```
 
@@ -35,16 +35,19 @@ node server.mjs        # serves dist/ and stores sign-ups (PORT=3000, DATA_DIR=.
 | The skill list | `src/skills.js` (`status: live / soon / hidden`) |
 | Publish a skill | put its source in Pimbo's `anymation/` folder, then `python tools/pack_skills.py` (copies the public parts into `skills/` and zips them into `public/downloads/`) |
 | Colours and layout | `src/styles.css` |
-| Claude and its eyes | `public/media/claude.webp` + `src/claude-rig.json`, made with toy-loops (`stills/claude_pose`, `tools/web_eyes.py`) |
+| Claude and its eyes | `src/media/claude.webp` + `src/claude-rig.json`, made with toy-loops (`stills/claude_pose`, `tools/web_eyes.py`) |
+| Pictures and videos | `src/media/`, imported in the code: the build names them by content, so browsers keep them for a year |
+| First-visit intro (Claude winks, then the page) | `src/components/Intro.jsx` + `src/intro.js`; shown once per browser, `?intro` shows it again |
 
-**Sign-ups.** "Download skill" asks for an email first, and so does "Notify me" for tutorials. `server.mjs` appends each
+**Sign-ups.** "Download skill" asks for an email the first time (after that the browser remembers it and the download starts
+right away), and so does "Notify me" for tutorials. `server.mjs` appends each
 one to `$DATA_DIR/subscribers.jsonl` (`{email, topic, at}`); no confirmation mail is sent. In Docker, `/data` is a
 volume, so the list survives redeploys.
 
 **Deploy (Dokploy).** Application → this repo → Build type: Dockerfile → port 3000 → mount a volume on `/data` →
 domain. Live at `skills.pimbo.dev` (through the Cloudflare tunnel to Traefik); the old address `pimbo.dev/skills`
-(*Strip path* on) answers with a 301 to it, from `server.mjs`. Every URL in the site is relative, so it also works under
-a path. The container has a health check on `/api/health`.
+(*Strip path* on) answers with a 301 to it, from `server.mjs`. The site expects to be at the root of its domain. The
+container has a health check on `/api/health`.
 
 ## Notes
 

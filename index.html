@@ -37,10 +37,15 @@
     <link rel="icon" type="image/png" href="media/favicon.png" />
     <link rel="apple-touch-icon" href="media/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="preload" as="image" href="media/hero-sky.webp" type="image/webp" />
+    <script>
+      // first visit: the page opens on Claude's face, winking (src/intro.js); ?intro shows it again
+      try {
+        if ((/[?&]intro/.test(location.search) || !localStorage.getItem('ps_intro')) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('intro-on');
+          setTimeout(function () { if (!window.__intro) document.documentElement.classList.remove('intro-on'); }, 8000);
+        }
+      } catch (e) {}
+    </script>
 
     <script type="application/ld+json">
       {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MetalFx } from 'metal-fx';
+import Metal from './Metal.jsx';
 import { LIVE, SOON } from '../skills.js';
 import { SITE, repoLink } from '../site.js';
 import { GitHubIcon, KindIcon, DownloadIcon, CopyIcon, CheckIcon, SparkleIcon } from './Icons.jsx';
@@ -8,10 +8,28 @@ import DownloadModal from './DownloadModal.jsx';
 import Logo from './Logo.jsx';
 import { cue } from '../fx.js';
 import { useLang } from '../i18n.js';
+import noSound from '../media/no-sound.vtt?url';
 
+// Videos load when they come near the screen and pause when they leave it. They are silent; the captions say so.
 function Media({ item, label }) {
+  const ref = useRef(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return undefined;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setNear(true); v.play().catch(() => {}); } else if (!v.paused) v.pause();
+    }, { rootMargin: '300px 0px' });
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
   if (item.type === 'video') {
-    return <video src={item.src} autoPlay muted loop playsInline preload="metadata" aria-label={label} />;
+    return (
+      <video ref={ref} src={near ? item.src : undefined} poster={near ? item.poster : undefined} width={item.w} height={item.h}
+        autoPlay muted loop playsInline preload="none" aria-label={label}>
+        <track kind="captions" src={noSound} srcLang="en" label="No sound" />
+      </video>
+    );
   }
   return <img src={item.src} alt={label} loading="lazy" />;
 }
@@ -118,11 +136,11 @@ export default function SkillPanel() {
               <a className="btn btn-dark" href={repoLink(skill.id)} target="_blank" rel="noreferrer" data-cuelume-tap data-cuelume-emphasis="subtle">
                 <GitHubIcon /> {t('source')}
               </a>
-              <MetalFx preset="silver" variant="button" theme="dark" strength={0.9}>
+              <Metal preset="silver" variant="button" theme="dark" strength={0.9}>
                 <button className="metal-pill small" onClick={() => setDownloading(skill)} data-cuelume-open>
                   <DownloadIcon /> {t('download_skill')}
                 </button>
-              </MetalFx>
+              </Metal>
             </div>
           </div>
 

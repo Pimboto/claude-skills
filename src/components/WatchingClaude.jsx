@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 // They follow the pointer with an underdamped spring, blink, go ^ ^ when you come close and > < while you press.
 const LOOK = { u: 3.6, v: 2.6 }; // how far the eyes slide on the face, in mm
 
-export default function WatchingClaude({ src, rig, className = '', squashOnClick = true, onPress, onRelease }) {
+export default function WatchingClaude({ src, srcSet, sizes, rig, className = '', squashOnClick = true, onPress, onRelease }) {
   const cb = useRef({});
   cb.current = { onPress, onRelease };
   const boxRef = useRef(null);
@@ -111,7 +111,7 @@ export default function WatchingClaude({ src, rig, className = '', squashOnClick
   const [w, h] = rig.image;
   return (
     <div ref={boxRef} className={`watching-claude ${className}`}>
-      <img src={src} alt="Claude, a small paper block with four legs, looking at you" draggable="false" width={w} height={h} />
+      <img src={src} srcSet={srcSet} sizes={sizes} alt="Claude, a small paper block with four legs, looking at you" draggable="false" width={w} height={h} />
       <svg ref={svgRef} viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
         {rig.eyes.map((e, i) => (
           <g key={e.side} ref={(el) => { if (el) eyeRefs.current[i] = { ...(eyeRefs.current[i] || {}), outer: el }; }}>

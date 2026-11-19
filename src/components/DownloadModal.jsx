@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MetalFx } from 'metal-fx';
+import Metal from './Metal.jsx';
 import { downloadLink } from '../site.js';
 import { DownloadIcon } from './Icons.jsx';
 import SkillTile from './SkillTile.jsx';
@@ -8,7 +8,7 @@ import { useLang } from '../i18n.js';
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const remembered = () => { try { return localStorage.getItem('ps_email') || ''; } catch { return ''; } };
-const remember = (e) => { try { localStorage.setItem('ps_email', e); } catch { /* private mode */ } };
+export const remember = (e) => { try { localStorage.setItem('ps_email', e); } catch { /* private mode */ } };
 
 // Sends the email to the site's own server (POST api/subscribe). No confirmation mail.
 // Throws an Error whose message is a dictionary key (email_bad, err_many, err_generic).
@@ -25,10 +25,27 @@ export async function subscribe(email, topic) {
 
 export default function DownloadModal({ skill, onClose }) {
   const { t } = useLang();
-  const [email, setEmail] = useState(remembered);
-  const [state, setState] = useState('idle'); // idle | sending | done | error
+  const [known] = useState(remembered);            // an email given before (a download or the tutorials list): not asked again
+  const [email, setEmail] = useState(known);
+  const [state, setState] = useState(known ? 'done' : 'idle'); // idle | sending | done | error
   const [error, setError] = useState('');
   const input = useRef(null);
+  const started = useRef(false);
+
+  const startDownload = () => {
+    const a = document.createElement('a');
+    a.href = downloadLink(skill.id);
+    a.download = `${skill.id}.zip`;
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+
+  useEffect(() => {
+    if (!known || started.current) return;
+    started.current = true;
+    startDownload();
+    cue('success');
+    subscribe(known, skill.id).catch(() => {});   // still noted: which skill this person took
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { lockScroll(true); return () => lockScroll(false); }, []);
 
@@ -49,10 +66,7 @@ export default function DownloadModal({ skill, onClose }) {
       remember(v);
       setState('done');
       cue('success');
-      const a = document.createElement('a');
-      a.href = downloadLink(skill.id);
-      a.download = `${skill.id}.zip`;
-      document.body.appendChild(a); a.click(); a.remove();
+      startDownload();
     } catch (err) {
       setError(err.message); setState('error'); cue('error');
     }
@@ -85,11 +99,11 @@ export default function DownloadModal({ skill, onClose }) {
                 aria-label="Email"
                 aria-invalid={state === 'error'}
               />
-              <MetalFx preset="chromatic" variant="button" theme="dark">
+              <Metal preset="chromatic" variant="button" theme="dark">
                 <button className="metal-pill" type="submit" disabled={state === 'sending'}>
                   <DownloadIcon /> {state === 'sending' ? t('sending') : t('download')}
                 </button>
-              </MetalFx>
+              </Metal>
             </div>
             {state === 'error' && <p className="err" role="alert">{t(error)}</p>}
           </form>
