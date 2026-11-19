@@ -1,6 +1,8 @@
 import rig from '../claude-rig.json';
 import claudeFull from '../media/claude.webp';
 import skyBlur from '../media/intro-sky.webp?inline';
+import { SoundIcon } from './Icons.jsx';
+import { useLang } from '../i18n.js';
 
 // The first-visit intro: Claude close up on a blurred sky looks at you, winks ^_< with two sparkles, then
 // src/intro.js pulls the camera back to the page. It is written into the page's HTML at build time
@@ -29,13 +31,16 @@ const Spark = ({ className }) => (
   </svg>
 );
 
-// Runs as soon as the intro's HTML is parsed: the show starts when Claude's picture is decoded (at most 2.5 s)
+// Runs as soon as the intro's HTML is parsed: the show starts when Claude's picture is decoded (at most 2.5 s);
+// taps that come before the page's code are counted for src/intro.js
 const BOOT = `(function(){var h=document.documentElement;if(!h.classList.contains('intro-on'))return;
-var i=document.querySelector('#intro .intro-body img'),d=0,r;window.__introReady=new Promise(function(f){r=f});
+var i=document.querySelector('#intro .intro-body img'),d=0,r;window.__introTaps=0;
+document.getElementById('intro').addEventListener('pointerdown',function(){window.__introTaps++});window.__introReady=new Promise(function(f){r=f});
 function go(){if(d)return;d=1;h.classList.add('intro-ready');r()}
 (i.decode?i.decode():Promise.reject()).then(go,function(){i.complete?go():i.addEventListener('load',go)});setTimeout(go,2500)})();`;
 
 export default function Intro() {
+  const { t } = useLang();
   const left = rig.eyes.find((e) => e.side !== WINK);
   const right = rig.eyes.find((e) => e.side === WINK);
   return (
@@ -54,6 +59,8 @@ export default function Intro() {
             </div>
           </div>
         </div>
+        {/* sound needs a tap first: say so */}
+        <div className="intro-hint"><SoundIcon on /> {t('intro_hint')}</div>
       </div>
       <script dangerouslySetInnerHTML={{ __html: BOOT }} />
     </>

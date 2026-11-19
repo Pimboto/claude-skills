@@ -29,12 +29,12 @@ const template = readFileSync(path.join(DIST, 'index.html'), 'utf8');
 // React adds an image preload for every picture it renders; the pictures are right there in the HTML, and the
 // preloads would compete with the sky (the largest paint) and are not part of what the browser code hydrates
 const noPreloads = (html) => html.replace(/<link rel="preload" as="image"[^>]*\/>/g, '');
-const intro = noPreloads(renderIntro());
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 function page(lang) {
   const { app: rendered, head } = render(lang);
   const app = noPreloads(rendered);
+  const intro = noPreloads(renderIntro(lang));
   const [title, description] = head.map(esc);
   let html = template
     .replace('</head>', `    ${preloads}\n  </head>`)

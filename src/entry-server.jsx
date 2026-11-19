@@ -8,4 +8,7 @@ export function render(lang) {
   setRenderLang(lang);
   return { app: renderToString(<App />), head: HEAD[lang] };
 }
-export const renderIntro = () => renderToStaticMarkup(<Intro />);
+export function renderIntro(lang) {
+  setRenderLang(lang);
+  return renderToStaticMarkup(<Intro />);
+}

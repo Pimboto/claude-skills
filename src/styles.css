@@ -254,6 +254,14 @@ html.intro-on .panel-frame { backdrop-filter: none; }
 .intro .spark { position: absolute; width: 9%; left: 70.5%; top: 31.5%; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)); }
 .intro .spark.s2 { width: 5%; left: 78.5%; top: 46.5%; }
 
+/* "tap Claude for sound": browsers keep a page silent until it is tapped */
+.intro-hint { position: absolute; z-index: 2; left: 50%; bottom: max(28px, 6cqh); translate: -50% 0; display: flex; align-items: center;
+  gap: 8px; padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; color: #fff; white-space: nowrap;
+  background: rgba(8, 20, 80, 0.62); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), 0 8px 24px rgba(4, 10, 50, 0.3);
+  opacity: 0; pointer-events: none; }
+html.intro-quiet .intro-hint { display: none; }
+html.intro-ready .intro-hint { animation: intro-hint 0.5s 0.8s ease-out both; }
+@keyframes intro-hint { from { opacity: 0; translate: -50% 10px; } to { opacity: 1; translate: -50% 0; } }
 html.intro-ready .intro-pop { animation: intro-pop 0.7s both; }
 html.intro-ready .intro-body { animation: intro-wink-body 2.6s 0.7s infinite; }
 html.intro-ready .intro .eye { animation: intro-look 1.15s both; }

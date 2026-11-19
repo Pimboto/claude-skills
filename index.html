@@ -44,6 +44,7 @@
         if ((/[?&]intro\b/.test(location.search) || !localStorage.getItem('ps_intro')) && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
           var h = document.documentElement, img = '__INTRO_IMG__', keys = /^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/;
           h.classList.add('intro-on');
+          if (localStorage.getItem('ps_sound') === 'off') h.classList.add('intro-quiet');
           if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
           if (img.indexOf('__') < 0) {
             var l = document.createElement('link');

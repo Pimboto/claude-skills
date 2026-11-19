@@ -43,13 +43,34 @@ async function afterWink(el) {
   if (phase < WINK_END) await sleep(WINK_END - phase);
 }
 
-// ms until the next wink (the '<' pops in at 10% of the loop), on the wink animation's own clock
-async function untilWink(el) {
-  const anim = el.querySelector('.intro-body')?.getAnimations()[0];
-  if (!anim) return null;
-  await anim.ready;
-  const t = Number(anim.currentTime) - ENTER - 0.1 * CYCLE;
-  return t < 0 ? -t : CYCLE - (t % CYCLE);
+// Where the wink loop is, on its own clock: ms into the current cycle (negative while Claude is still popping up)
+const SHOWN = [0.1 * CYCLE, 0.255 * CYCLE];   // the '<' is on screen
+function phase(el) {
+  const body = el.querySelector('.intro-body')?.getAnimations()[0];
+  if (!body) return null;
+  const t = Number(body.currentTime) - ENTER;
+  return t < 0 ? t : t % CYCLE;
+}
+
+// A tap: if no wink is coming or showing, the loops jump to the start of their next cycle so Claude winks at you
+// right away; the flight waits for that wink. Returns how long to hold the flight.
+function winkAgain(el) {
+  const ph = phase(el);
+  if (ph === null || ph < SHOWN[1]) return 0;      // popping up, about to wink or winking: that wink will do
+  const body = el.querySelector('.intro-body').getAnimations()[0];
+  const next = Number(body.currentTime) + (CYCLE - ph);
+  for (const a of el.getAnimations({ subtree: true })) {
+    if (a.effect?.getComputedTiming().iterations === Infinity) a.currentTime = next;
+  }
+  return WINK_END + 150;
+}
+
+// ms until the '<' shows (0 while it is showing)
+function untilWink(el) {
+  const ph = phase(el);
+  if (ph === null) return null;
+  if (ph < SHOWN[0]) return SHOWN[0] - ph;
+  return ph < SHOWN[1] ? 0 : CYCLE - ph + SHOWN[0];
 }
 
 let started = false;
@@ -62,7 +83,9 @@ export function runIntro() {
   try { localStorage.setItem('ps_intro', '1'); } catch { /* private mode */ }
 
   let going = false;
+  let holdUntil = 0;              // a tap asked for one more wink first
   const go = async (fast) => {
+    if (!fast && holdUntil > performance.now()) await sleep(holdUntil - performance.now());
     if (going) return;
     going = true;
     removeEventListener('introskip', skip);
@@ -100,6 +123,7 @@ export function runIntro() {
       { offset: 1, transform: at(s, s) },
     ], { duration: D, fill: 'forwards' });
     sky.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D * 0.6, delay: D * 0.12, easing: 'ease-in-out', fill: 'forwards' });
+    el.querySelector('.intro-hint')?.animate([{ opacity: 0 }], { duration: 200, fill: 'forwards' });
     root.style.transformOrigin = `${B.left + B.width / 2 - r.left}px ${B.top + B.height / 2 - r.top}px`;
     root.animate([{ transform: 'scale(1.12)' }, { transform: 'none' }], { duration: D * 0.76, easing: 'cubic-bezier(0.6, 0, 0.25, 1)' });
     await fly.finished;
@@ -109,19 +133,23 @@ export function runIntro() {
   const skip = () => go(true);
   let tapped = false;
   const onTap = () => {
+    if (going) { withSound(INTRO_CUES.tap); return; }
     if (tapped || !html.classList.contains('intro-ready')) return skip();
     tapped = true;
     el.querySelector('.intro-pop').animate([{ scale: '1' }, { scale: '1.07 0.9' }, { scale: '0.97 1.04' }, { scale: '1' }],
       { duration: 420, easing: 'ease-out' });
-    withSound(async () => {
+    el.querySelector('.intro-hint')?.animate([{ opacity: 0 }], { duration: 200, fill: 'forwards' });
+    holdUntil = performance.now() + winkAgain(el);
+    withSound(() => {
       INTRO_CUES.tap();
-      const d = await untilWink(el);
-      if (d !== null) setTimeout(() => { if (!going) INTRO_CUES.wink(); }, d);
+      const d = untilWink(el);
+      if (d !== null) setTimeout(() => { if (!going) INTRO_CUES.wink(); }, Math.max(d, 120));
     });
   };
   addEventListener('introskip', skip);
   el.addEventListener('pointerdown', onTap);
-  if (window.__introSkip) { go(true); return; }
+  if (window.__introSkip || window.__introTaps > 1) { go(true); return; }
+  if (window.__introTaps === 1) onTap();           // tapped before this code arrived
 
   const ready = upTo(window.__introReady || Promise.resolve(), 3000);
   // the sound code, when the browser has a moment, so a tap can sound at once
@@ -135,7 +163,7 @@ export function runIntro() {
 }
 
 function end(el) {
-  html.classList.remove('intro-on', 'intro-ready');
+  html.classList.remove('intro-on', 'intro-ready', 'intro-quiet');
   el?.remove();
   window.__introUnblock?.();
   finish();
