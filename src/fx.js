@@ -24,6 +24,32 @@ export async function setSound(on) {
 export const cue = (name, options) => { if (soundOn && sound) sound.play(name, options); };
 export const squeezeClaude = () => cue('tap', { theme: 'bubble', emphasis: 'strong' });
 export const releaseClaude = () => cue('select', { theme: 'bubble' });
+// Claude's temper (WatchingClaude onMood): the error cue when he snaps, a soft bubble tap on every hop
+const MOOD = {
+  angry: ['error', { emphasis: 'strong' }],
+  hop: ['tap', { theme: 'bubble', emphasis: 'subtle' }],
+  leave: ['close'],
+  peek: ['attention', { emphasis: 'subtle' }],
+  back: ['open', { theme: 'bubble' }],
+};
+export const claudeMood = (m) => { if (MOOD[m]) cue(...MOOD[m]); };
+
+// The intro's sounds. Nothing can sound before the visitor clicks or taps the page (browsers, and cuelume itself,
+// refuse), so they start from a tap during the intro.
+export const canSound = () => soundOn && !!navigator.userActivation?.hasBeenActive;
+export const preloadSound = () => { if (soundOn) loadSound(); };   // the code only, no audio yet
+// runs fn once cuelume is loaded and audio is on, if a sound can play now
+export async function withSound(fn) {
+  if (!canSound()) return;
+  const m = await loadSound();
+  if (await m.unlock()) fn();
+}
+export const INTRO_CUES = {
+  tap: () => cue('tap', { theme: 'bubble', emphasis: 'strong' }),
+  wink: () => cue('success', { emphasis: 'subtle' }),
+  fly: () => cue('navigate', { emphasis: 'subtle' }),
+  land: () => cue('tap', { theme: 'bubble' }),
+};
 
 let lenis = null;
 export function startFx() {

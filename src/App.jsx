@@ -5,7 +5,7 @@ import SkillPanel from './components/SkillPanel.jsx';
 import Footer from './components/Footer.jsx';
 import Logo from './components/Logo.jsx';
 import { GitHubIcon, Arrow, Chevron, SoundIcon } from './components/Icons.jsx';
-import { startFx, isSoundOn, setSound, squeezeClaude, releaseClaude, cue } from './fx.js';
+import { startFx, isSoundOn, setSound, squeezeClaude, releaseClaude, claudeMood, cue } from './fx.js';
 import { runIntro } from './intro.js';
 import { useLang, LANGS } from './i18n.js';
 import { SITE } from './site.js';
@@ -96,7 +96,7 @@ export default function App() {
 
           <div className="wrap stage">
             <WatchingClaude className="hero-claude" src={claudeFull} srcSet={`${claude560} 560w, ${claudeFull} 1075w`}
-              sizes="(max-width: 980px) min(360px, 80vw), 440px" rig={rig} onPress={squeezeClaude} onRelease={releaseClaude} />
+              sizes="(max-width: 980px) min(360px, 80vw), 440px" rig={rig} onPress={squeezeClaude} onRelease={releaseClaude} onMood={claudeMood} />
             <SkillPanel />
           </div>
         </main>
